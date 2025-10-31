@@ -1,28 +1,49 @@
-*This repository acts as a template for all of Oracle’s GitHub repositories. It contains information about the guidelines for those repositories. All files and sections contained in this template are mandatory, and a GitHub app ensures alignment with these guidelines. To get started with a new repository, replace the italic paragraphs with the respective text for your project.*
+# oci-openai
 
-# Project name
+[![PyPI - Version](https://img.shields.io/pypi/v/oci-openai.svg)](https://pypi.org/project/oci-openai)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/oci-openai.svg)](https://pypi.org/project/oci-openai)
 
-*Describe your project's features, functionality and target audience*
+OCI-OpenAI is a client library maintained by the Oracle Cloud Infrastructure (OCI) [Generative AI Service](https://docs.oracle.com/en-us/iaas/Content/generative-ai/home.htm) team.
+This package simplifies integration between OpenAI’s Python SDK and Oracle Cloud Infrastructure (OCI) GenAI service by providing robust authentication and authorization utilities.
+Developers can seamlessly connect to Oracle Generative AI services using OCI credentials, ensuring secure and compliant access while leveraging industry best practices.
+
+-----
+
+## Table of Contents
+
+- [Installation](#installation)
+- [License](#license)
 
 ## Installation
 
-*Provide detailed step-by-step installation instructions. You can name this section **How to Run** or **Getting Started** instead of **Installation** if that's more acceptable for your project*
-
-## Documentation
-
-*Developer-oriented documentation can be published on GitHub, but all product documentation must be published on <https://docs.oracle.com>*
+```console
+pip install oci-openai
+```
 
 ## Examples
 
-*Describe any included examples or provide a link to a demo/tutorial*
+```python
+from oci_openai import OciOpenAI, OciSessionAuth
 
-## Help
+client = OciOpenAI(
+    service_endpoint="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com",
+    auth=OciSessionAuth(profile_name="<profile name>"),
+    compartment_id="<compartment ocid>",
+)
 
-*Inform users on where to get help or how to receive official support from Oracle (if applicable)*
+completion = client.chat.completions.create(
+    model="<model name>",
+    messages=[
+        {
+            "role": "user",
+            "content": "How do I output all files in a directory using Python?",
+        },
+    ],
+)
+print(completion.model_dump_json())
+```
 
 ## Contributing
-
-*If your project has specific contribution requirements, update the CONTRIBUTING.md file to ensure those requirements are clearly explained*
 
 This project welcomes contributions from the community. Before submitting a pull request, please [review our contribution guide](./CONTRIBUTING.md)
 
@@ -32,13 +53,7 @@ Please consult the [security guide](./SECURITY.md) for our responsible security 
 
 ## License
 
-*The correct copyright notice format for both documentation and software is*
-    "Copyright (c) [year,] year Oracle and/or its affiliates."
-*You must include the year the content was first released (on any platform) and the most recent year in which it was revised*
-
-Copyright (c) 2023 Oracle and/or its affiliates.
-
-*Replace this statement if your project is not licensed under the UPL*
+Copyright (c) 2025 Oracle and/or its affiliates.
 
 Released under the Universal Permissive License v1.0 as shown at
-<https://oss.oracle.com/licenses/upl/>.
+<https://oss.oracle.com/licenses/upl/>

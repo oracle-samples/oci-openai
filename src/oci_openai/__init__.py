@@ -4,11 +4,11 @@
 from .oci_openai import (
     AsyncOciOpenAI,
     HttpxOciAuth,
-    OciInstancePrincipleAuth,
+    OciInstancePrincipalAuth,
     OciOpenAI,
-    OciResourcePrincipleAuth,
+    OciResourcePrincipalAuth,
     OciSessionAuth,
-    OciUserPrincipleAuth,
+    OciUserPrincipalAuth,
 )
 
 __all__ = [
@@ -16,7 +16,7 @@ __all__ = [
     "AsyncOciOpenAI",
     "HttpxOciAuth",
     "OciSessionAuth",
-    "OciResourcePrincipleAuth",
-    "OciInstancePrincipleAuth",
-    "OciUserPrincipleAuth",
+    "OciResourcePrincipalAuth",
+    "OciInstancePrincipalAuth",
+    "OciUserPrincipalAuth",
 ]

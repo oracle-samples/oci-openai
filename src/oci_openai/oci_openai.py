@@ -182,7 +182,7 @@ class OciSessionAuth(HttpxOciAuth):
             return f.read().strip()
 
 
-class OciResourcePrincipleAuth(HttpxOciAuth):
+class OciResourcePrincipalAuth(HttpxOciAuth):
     """
     OCI authentication implementation using Resource Principal authentication.
 
@@ -195,7 +195,7 @@ class OciResourcePrincipleAuth(HttpxOciAuth):
         self.signer = oci.auth.signers.get_resource_principals_signer()  # type: ignore
 
 
-class OciInstancePrincipleAuth(HttpxOciAuth):
+class OciInstancePrincipalAuth(HttpxOciAuth):
     """
     OCI authentication implementation using Instance Principal authentication.
 
@@ -207,9 +207,9 @@ class OciInstancePrincipleAuth(HttpxOciAuth):
         self.signer = oci.auth.signers.InstancePrincipalsSecurityTokenSigner(**kwargs)
 
 
-class OciUserPrincipleAuth(HttpxOciAuth):
+class OciUserPrincipalAuth(HttpxOciAuth):
     """
-    OCI authentication implementation using user principle authentication.
+    OCI authentication implementation using user principal authentication.
 
         This class implements OCI authentication using API Key credentials loaded from
     the OCI configuration file. It's suitable for programmatic access to OCI services.

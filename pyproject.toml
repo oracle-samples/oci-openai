@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "oci-openai"
 dynamic = ["version"]
-description = ''
+description = 'OCI authentication and authorization utilities for OpenAI python SDK'
 readme = "README.md"
 requires-python = ">=3.8"
 license = "UPL-1.0"
@@ -52,9 +52,9 @@ dev = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/oracle/oci-openai#readme"
-Issues = "https://github.com/oracle/oci-openai/issues"
-Source = "https://github.com/oracle/oci-openai"
+Documentation = "https://github.com/oracle-samples/oci-openai#readme"
+Issues = "https://github.com/oracle-samples/oci-openai/issues"
+Source = "https://github.com/oracle-samples/oci-openai"
 
 [tool.hatch.version]
 path = "src/oci_openai/__about__.py"

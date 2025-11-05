@@ -15,7 +15,7 @@ from oci_openai import (
 )
 from oci_openai.oci_openai import _build_service_url
 
-SERVICE_ENDPOINT = "https://fake-oci-endpoint.com"
+SERVICE_ENDPOINT = "https://generativeai.fake-oci-endpoint.com"
 COMPARTMENT_ID = "ocid1.compartment.oc1..exampleuniqueID"
 
 

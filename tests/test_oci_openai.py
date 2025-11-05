@@ -7,11 +7,11 @@ import httpx
 import pytest
 
 from oci_openai import (
-    OciInstancePrincipleAuth,
+    OciInstancePrincipalAuth,
     OciOpenAI,
-    OciResourcePrincipleAuth,
+    OciResourcePrincipalAuth,
     OciSessionAuth,
-    OciUserPrincipleAuth,
+    OciUserPrincipalAuth,
 )
 from oci_openai.oci_openai import _build_service_url
 
@@ -48,7 +48,7 @@ def create_oci_openai_client_with_resource_principal_auth():
     with patch(
         "oci.auth.signers.get_resource_principals_signer", return_value=MagicMock()
     ):
-        auth = OciResourcePrincipleAuth()
+        auth = OciResourcePrincipalAuth()
         client = OciOpenAI(
             service_endpoint=SERVICE_ENDPOINT,
             auth=auth,
@@ -62,7 +62,7 @@ def create_oci_openai_client_with_instance_principal_auth():
         "oci.auth.signers.InstancePrincipalsSecurityTokenSigner",
         return_value=MagicMock(),
     ):
-        auth = OciInstancePrincipleAuth()
+        auth = OciInstancePrincipalAuth()
         client = OciOpenAI(
             service_endpoint=SERVICE_ENDPOINT,
             auth=auth,
@@ -83,7 +83,7 @@ def create_oci_openai_client_with_user_principal_auth():
     ), patch("oci.config.validate_config", return_value=True), patch(
         "oci.signer.Signer", return_value=MagicMock()
     ):
-        auth = OciUserPrincipleAuth()
+        auth = OciUserPrincipalAuth()
         client = OciOpenAI(
             service_endpoint=SERVICE_ENDPOINT,
             auth=auth,

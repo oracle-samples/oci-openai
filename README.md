@@ -3,24 +3,46 @@
 [![PyPI - Version](https://img.shields.io/pypi/v/oci-openai.svg)](https://pypi.org/project/oci-openai)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/oci-openai.svg)](https://pypi.org/project/oci-openai)
 
-OCI-OpenAI is a client library maintained by the Oracle Cloud Infrastructure (OCI) [Generative AI Service](https://docs.oracle.com/en-us/iaas/Content/generative-ai/home.htm) team.
-This package simplifies integration between OpenAI’s Python SDK and Oracle Cloud Infrastructure (OCI) GenAI service by providing robust authentication and authorization utilities.
-Developers can seamlessly connect to Oracle Generative AI services using OCI credentials, ensuring secure and compliant access while leveraging industry best practices.
+**OCI-OpenAI** is a client library jointly maintained by the **Oracle Cloud Infrastructure (OCI) Generative AI** and **OCI Data Science** teams.
 
------
+This package simplifies integration between **OpenAI’s Python SDK** and Oracle Cloud Infrastructure services — supporting both the **OCI Generative AI Service** and the **OCI Data Science Model Deployment** service.
+It provides robust authentication and authorization utilities that allow developers to securely connect to and invoke OCI-hosted large language models (LLMs) using standard OpenAI-compatible APIs.
+
+By leveraging this library, you can:
+- Seamlessly connect to **OCI Generative AI** endpoints.
+- Interact with **OCI Data Science Model Deployment** LLM endpoints using the same OpenAI-style interface.
+- Ensure compliance with OCI security and access control best practices.
+
+---
 
 ## Table of Contents
 
-- [Installation](#installation)
-- [License](#license)
+- [oci-openai](#oci-openai)
+  - [Table of Contents](#table-of-contents)
+  - [Installation](#installation)
+  - [Examples](#examples)
+    - [OCI Generative AI](#oci-generative-ai)
+    - [OCI Data Science Model Deployment](#oci-data-science-model-deployment)
+      - [Using the OCI OpenAI Synchronous Client](#using-the-oci-openai-synchronous-client)
+      - [Using the OCI OpenAI Asynchronous Client](#using-the-oci-openai-asynchronous-client)
+      - [Using the Native OpenAI Client](#using-the-native-openai-client)
+  - [Contributing](#contributing)
+  - [Security](#security)
+  - [License](#license)
+
+---
 
 ## Installation
 
 ```console
 pip install oci-openai
-```
+````
+
+---
 
 ## Examples
+
+### OCI Generative AI
 
 ```python
 from oci_openai import OciOpenAI, OciSessionAuth
@@ -43,17 +65,103 @@ completion = client.chat.completions.create(
 print(completion.model_dump_json())
 ```
 
+---
+
+### OCI Data Science Model Deployment
+
+#### Using the OCI OpenAI Synchronous Client
+
+```python
+from oci_openai import OciOpenAI, OciSessionAuth
+
+client = OciOpenAI(
+    service_endpoint="https://modeldeployment.us-ashburn-1.oci.customer-oci.com/<OCID>/predict/v1",
+    auth=OciSessionAuth(profile_name="<profile name>")
+)
+
+response = client.chat.completions.create(
+    model="<model-name>",
+    messages=[
+        {
+            "role": "user",
+            "content": "Explain how to list all files in a directory using Python.",
+        },
+    ],
+)
+
+print(response.model_dump_json())
+```
+
+#### Using the OCI OpenAI Asynchronous Client
+
+```python
+from oci_openai import AsyncOciOpenAI, OciSessionAuth
+
+# Example for OCI Data Science Model Deployment endpoint
+client = AsyncOciOpenAI(
+    service_endpoint="https://modeldeployment.us-ashburn-1.oci.customer-oci.com/<OCID>/predict/v1",
+    auth=OciSessionAuth(profile_name="<profile name>")
+)
+
+response = await client.chat.completions.create(
+    model="<model-name>",
+    messages=[
+        {
+            "role": "user",
+            "content": "Explain how to list all files in a directory using Python.",
+        },
+    ],
+)
+
+print(response.model_dump_json())
+```
+
+
+#### Using the Native OpenAI Client
+
+```python
+
+import httpx
+from openai import OpenAI
+from oci_openai import OciSessionAuth
+
+# Example for OCI Data Science Model Deployment endpoint
+client = OpenAI(
+    api_key="OCI",
+    base_url="https://modeldeployment.us-ashburn-1.oci.customer-oci.com/<OCID>/predict/v1",
+    http_client=httpx.client(auth=OciSessionAuth()),
+)
+
+response = client.chat.completions.create(
+    model="<model-name>",
+    messages=[
+        {
+            "role": "user",
+            "content": "Explain how to list all files in a directory using Python.",
+        },
+    ],
+)
+print(response.model_dump_json())
+```
+
+---
+
 ## Contributing
 
-This project welcomes contributions from the community. Before submitting a pull request, please [review our contribution guide](./CONTRIBUTING.md)
+This project welcomes contributions from the community.
+Before submitting a pull request, please [review our contribution guide](./CONTRIBUTING.md).
+
+---
 
 ## Security
 
-Please consult the [security guide](./SECURITY.md) for our responsible security vulnerability disclosure process
+Please consult the [security guide](./SECURITY.md) for our responsible security vulnerability disclosure process.
+
+---
 
 ## License
 
 Copyright (c) 2025 Oracle and/or its affiliates.
 
 Released under the Universal Permissive License v1.0 as shown at
-<https://oss.oracle.com/licenses/upl/>
+[https://oss.oracle.com/licenses/upl/](https://oss.oracle.com/licenses/upl/)

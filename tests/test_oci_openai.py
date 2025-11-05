@@ -13,6 +13,7 @@ from oci_openai import (
     OciSessionAuth,
     OciUserPrincipleAuth,
 )
+from oci_openai.oci_openai import _build_service_url
 
 SERVICE_ENDPOINT = "https://fake-oci-endpoint.com"
 COMPARTMENT_ID = "ocid1.compartment.oc1..exampleuniqueID"
@@ -111,3 +112,15 @@ def test_oci_openai_auth_headers(client_factory, respx_mock):
     sent_headers = route.calls[0].request.headers
     assert sent_headers["compartmentId"] == COMPARTMENT_ID
     assert str(route.calls[0].request.url).startswith(SERVICE_ENDPOINT)
+
+
+def test_build_service_url():
+    """Test that the function appends the inference path for Generative AI endpoints."""
+
+    endpoint = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
+    result = _build_service_url(endpoint)
+    assert result == f"{endpoint}/20231130/actions/v1"
+
+    endpoint = "https://datascience.us-phoenix-1.oci.oraclecloud.com/20190101/actions/invokeEndpoint"
+    result = _build_service_url(endpoint)
+    assert result == endpoint

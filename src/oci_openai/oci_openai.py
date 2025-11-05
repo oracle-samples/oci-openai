@@ -3,42 +3,40 @@
 
 from __future__ import annotations
 
-from typing import Any, Generator, Mapping, Type
+import logging
+from typing import Any, Generator, Mapping, Optional, Type
 
 import httpx
 import oci
 import requests
 from oci.config import DEFAULT_LOCATION, DEFAULT_PROFILE
 from openai._base_client import DefaultAsyncHttpxClient, DefaultHttpxClient
-from openai._client import (
-    DEFAULT_MAX_RETRIES,
-    AsyncOpenAI,
-    OpenAI,
-    Timeout,
-)
-from openai._types import not_given, NotGiven
-
+from openai._client import AsyncOpenAI, OpenAI, Timeout
+from openai._constants import DEFAULT_MAX_RETRIES
+from openai._types import NOT_GIVEN, NotGiven
 from typing_extensions import override
+
+logger = logging.getLogger(__name__)
 
 OciAuthSigner = Type[oci.signer.AbstractBaseSigner]
 
 
 class OciOpenAI(OpenAI):
     """
-    A custom OpenAI client implementation for Oracle Cloud Infrastructure (OCI)
-    Generative AI service.
+    A custom OpenAI client implementation for Oracle Cloud Infrastructure (OCI).
 
-    This class extends the OpenAI client to work with OCI's Generative AI
-    service endpoints, handling authentication and request signing specific to OCI.
+    This class extends the OpenAI client to work with OCI Generative AI service
+    endpoints and OpenAI-compatible OCI Data Science Model Deployment endpoints,
+    handling authentication and request signing specific to OCI.
 
     Attributes:
-        service_endpoint (str): The OCI service endpoint URL
-        auth (httpx.Auth): Authentication handler for OCI
-        compartment_id (str): OCI compartment ID for resource isolation
-        timeout (float | Timeout | None | NotGiven): Request timeout configuration
-        max_retries (int): Maximum number of retry attempts for failed requests
-        default_headers (Mapping[str, str] | None): Default HTTP headers
-        default_query (Mapping[str, object] | None): Default query parameters
+        service_endpoint (str): The OCI service endpoint URL.
+        auth (httpx.Auth): Authentication handler for OCI request signing.
+        compartment_id (str | None): Optional OCI compartment OCID for resource isolation.
+        timeout (float | Timeout | None | NotGiven): Request timeout configuration.
+        max_retries (int): Maximum number of retry attempts for failed requests.
+        default_headers (Mapping[str, str] | None): Default HTTP headers.
+        default_query (Mapping[str, object] | None): Default query parameters.
     """
 
     def __init__(
@@ -46,45 +44,52 @@ class OciOpenAI(OpenAI):
         *,
         service_endpoint: str,
         auth: httpx.Auth,
-        compartment_id: str,
-        timeout: float | Timeout | None | NotGiven = not_given,
+        compartment_id: Optional[str] = None,
+        timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
         max_retries: int = DEFAULT_MAX_RETRIES,
-        default_headers: Mapping[str, str] | None = None,
-        default_query: Mapping[str, object] | None = None,
+        default_headers: Optional[Mapping[str, str]] = None,
+        default_query: Optional[Mapping[str, object]] = None,
+        **kwargs: Any,
     ) -> None:
+        # Build base_url
+        base_url = _build_service_url(service_endpoint=service_endpoint)
+
+        # Only set http client headers if we actually have a compartment_id
+        http_client_headers = (
+            {"CompartmentId": compartment_id} if compartment_id else None
+        )
+
         super().__init__(
             api_key="<NOTUSED>",
-            base_url=f"{service_endpoint}/20231130/actions/v1",
+            base_url=base_url,
             timeout=timeout,
             max_retries=max_retries,
             default_headers=default_headers,
             default_query=default_query,
             http_client=DefaultHttpxClient(
                 auth=auth,
-                headers={
-                    "CompartmentId": compartment_id,
-                },
+                headers=http_client_headers,
             ),
+            **kwargs,
         )
 
 
 class AsyncOciOpenAI(AsyncOpenAI):
     """
-    An async custom OpenAI client implementation for Oracle Cloud Infrastructure (OCI)
-    Generative AI service.
+    An async OpenAI-compatible client for Oracle Cloud Infrastructure (OCI).
 
-    This class extends the AsyncOpenAI client to work with OCI's Generative AI
-    service endpoints, handling authentication and request signing specific to
-    OCI with async/await support.
+    Supports OCI Generative AI service endpoints and OpenAI-compatible
+    OCI Data Science Model Deployment endpoints with async/await,
+    handling OCI-specific authentication and request signing.
 
     Attributes:
-        service_endpoint (str): The OCI service endpoint URL
-        auth (httpx.Auth): Authentication handler for OCI
-        compartment_id (str): OCI compartment ID for resource isolation
-        timeout (float | Timeout | None | NotGiven): Request timeout configuration
-        max_retries (int): Maximum number of retry attempts for failed requests
-        default_headers (Mapping[str, str] | None): Default HTTP headers
-        default_query (Mapping[str, object] | None): Default query parameters
+        service_endpoint (str): OCI service endpoint URL.
+        auth (httpx.Auth): Authentication handler for OCI request signing.
+        compartment_id (str | None): Optional OCI compartment OCID.
+        timeout (float | Timeout | None | NotGiven): Request timeout configuration.
+        max_retries (int): Max retry attempts for failed requests.
+        default_headers (Mapping[str, str] | None): Default HTTP headers.
+        default_query (Mapping[str, object] | None): Default query parameters.
     """
 
     def __init__(
@@ -92,25 +97,33 @@ class AsyncOciOpenAI(AsyncOpenAI):
         *,
         service_endpoint: str,
         auth: httpx.Auth,
-        compartment_id: str,
-        timeout: float | Timeout | None | NotGiven = not_given,
+        compartment_id: Optional[str] = None,
+        timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
         max_retries: int = DEFAULT_MAX_RETRIES,
-        default_headers: Mapping[str, str] | None = None,
-        default_query: Mapping[str, object] | None = None,
+        default_headers: Optional[Mapping[str, str]] = None,
+        default_query: Optional[Mapping[str, object]] = None,
+        **kwargs: Any,
     ) -> None:
+        # Build base_url
+        base_url = _build_service_url(service_endpoint=service_endpoint)
+
+        # Only set http client headers if we actually have a compartment_id
+        http_client_headers = (
+            {"CompartmentId": compartment_id} if compartment_id else None
+        )
+
         super().__init__(
             api_key="<NOTUSED>",
-            base_url=f"{service_endpoint}/20231130/actions/v1",
+            base_url=base_url,
             timeout=timeout,
             max_retries=max_retries,
             default_headers=default_headers,
             default_query=default_query,
             http_client=DefaultAsyncHttpxClient(
                 auth=auth,
-                headers={
-                    "CompartmentId": compartment_id,
-                },
+                headers=http_client_headers,
             ),
+            **kwargs,
         )
 
 
@@ -232,3 +245,26 @@ class OciUserPrincipleAuth(HttpxOciAuth):
             pass_phrase=oci.config.get_config_value_or_default(config, "pass_phrase"),  # type: ignore
             private_key_content=config.get("key_content"),
         )
+
+
+def _build_service_url(service_endpoint: str) -> str:
+    """Constructs the service URL based on the provided endpoint."""
+
+    if not service_endpoint:
+        raise ValueError("Service endpoint must be provided.")
+
+    # Normalize
+    base_url = service_endpoint.rstrip("/")
+
+    # If it's a Generative AI endpoint, append the inference path
+    if "generativeai" in base_url:
+        url = f"{base_url}/20231130/actions/v1"
+        logger.debug("Detected Generative AI endpoint. Constructed full URL: %s", url)
+        return url
+
+    # If it's a Data Science model deployment endpoint, leave as is
+    logger.debug(
+        "Detected Model Deployment endpoint. Using service endpoint directly: %s",
+        base_url,
+    )
+    return base_url

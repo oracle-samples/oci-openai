@@ -25,6 +25,7 @@ By leveraging this library, you can:
       - [Using the OCI OpenAI Synchronous Client](#using-the-oci-openai-synchronous-client)
       - [Using the OCI OpenAI Asynchronous Client](#using-the-oci-openai-asynchronous-client)
       - [Using the Native OpenAI Client](#using-the-native-openai-client)
+      - [Using with Langchain](#using-with-langchain-openai)
     - [OCI Data Science Model Deployment](#oci-data-science-model-deployment)
       - [Using the OCI OpenAI Synchronous Client](#using-the-oci-openai-synchronous-client-1)
       - [Using the OCI OpenAI Asynchronous Client](#using-the-oci-openai-asynchronous-client-1)
@@ -100,13 +101,16 @@ print(completion.model_dump_json())
 
 import httpx
 from openai import OpenAI
-from oci_openai import OciSessionAuth
+from oci_openai import OciUserPrincipalAuth
 
 # Example for OCI Data Science Model Deployment endpoint
 client = OpenAI(
     api_key="OCI",
     base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1",
-    http_client=httpx.client(auth=OciSessionAuth()),
+    http_client=httpx.Client(
+        auth=OciUserPrincipalAuth(profile_name="DEFAULT"), 
+        headers={"CompartmentId": COMPARTMENT_ID}
+    ),
 )
 
 response = client.chat.completions.create(
@@ -119,6 +123,46 @@ response = client.chat.completions.create(
     ],
 )
 print(response.model_dump_json())
+```
+
+#### Using with langchain-openai
+
+```python
+from langchain_openai import ChatOpenAI
+import httpx
+from oci_openai import OciUserPrincipalAuth
+import os
+
+
+COMPARTMENT_ID=os.getenv("OCI_COMPARTMENT_ID", "<compartment_id>")
+
+llm = ChatOpenAI(
+    model="<model-name>",  # for example "xai.grok-4-fast-reasoning"
+    api_key="OCI",
+    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1",
+    http_client=httpx.Client(
+        auth=OciUserPrincipalAuth(profile_name="DEFAULT"), 
+        headers={"CompartmentId": COMPARTMENT_ID}
+    ),
+    # use_responses_api=True
+    # stream_usage=True,
+    # temperature=None,
+    # max_tokens=None,
+    # timeout=None,
+    # reasoning_effort="low",
+    # max_retries=2,
+    # other params...
+)
+
+messages = [
+    (
+        "system",
+        "You are a helpful assistant that translates English to French. Translate the user sentence.",
+    ),
+    ("human", "I love programming."),
+]
+ai_msg = llm.invoke(messages)
+print(ai_msg)
 ```
 
 ---
@@ -185,7 +229,7 @@ from oci_openai import OciSessionAuth
 client = OpenAI(
     api_key="OCI",
     base_url="https://modeldeployment.us-ashburn-1.oci.customer-oci.com/<OCID>/predict/v1",
-    http_client=httpx.client(auth=OciSessionAuth()),
+    http_client=httpx.Client(auth=OciSessionAuth()),
 )
 
 response = client.chat.completions.create(

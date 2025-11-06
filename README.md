@@ -29,6 +29,7 @@ By leveraging this library, you can:
       - [Using the OCI OpenAI Synchronous Client](#using-the-oci-openai-synchronous-client-1)
       - [Using the OCI OpenAI Asynchronous Client](#using-the-oci-openai-asynchronous-client-1)
       - [Using the Native OpenAI Client](#using-the-native-openai-client-1)
+      - [Using with Langchain](#using-with-langchain-openai-1)
     - [Signers](#signers)
   - [Contributing](#contributing)
   - [Security](#security)

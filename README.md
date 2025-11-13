@@ -103,7 +103,7 @@ import httpx
 from openai import OpenAI
 from oci_openai import OciUserPrincipalAuth
 
-# Example for OCI Data Science Model Deployment endpoint
+# Example for OCI Generative AI endpoint
 client = OpenAI(
     api_key="OCI",
     base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1",

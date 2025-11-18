@@ -3,7 +3,7 @@ from oci_openai import OciOpenAI, OciSessionAuth
 
 COMPARTMENT_ID = "ocid1.tenancy.oc1..dummy"
 CONVERSATION_STORE_ID = "ocid1.generativeaiconversationstore.oc1.us-chicago-1.dummy"
-OVERRIDE_URL = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1"
+OVERRIDE_URL = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
 PROFILE_NAME = "oc1"
 MODEL = "openai.gpt-4o"
 REGION = "us-chicago-1"

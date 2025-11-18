@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import logging
-import re
 from typing import Any, Generator, Mapping, Optional, Type
 
 import httpx
@@ -54,6 +53,7 @@ class OciOpenAI(OpenAI):
         *,
         region: str = None,
         service_endpoint: str = None,
+        base_url: str = None,
         auth: httpx.Auth,
         compartment_id: str,
         conversation_store_id: Optional[str] = None,
@@ -63,13 +63,7 @@ class OciOpenAI(OpenAI):
         default_query: Optional[Mapping[str, object]] = None,
         **kwargs: Any,
     ) -> None:
-        # build service endpoint by region when service_endpoint is empty,
-        # then build base url from service endpoint
-        if not service_endpoint and not region:
-            raise ValueError("Region or service endpoint must be provided.")
-        base_url = _build_base_url(
-            service_endpoint if service_endpoint else _build_service_endpoint(region)
-        )
+        base_url = _override_base_url(region, service_endpoint, base_url)
 
         http_client_headers = {
             COMPARTMENT_ID_HEADER: compartment_id,  # for backward compatibility
@@ -119,6 +113,7 @@ class AsyncOciOpenAI(AsyncOpenAI):
         *,
         region: str = None,
         service_endpoint: str = None,
+        base_url: str = None,
         auth: httpx.Auth,
         compartment_id: Optional[str] = None,
         conversation_store_id: Optional[str] = None,
@@ -128,13 +123,7 @@ class AsyncOciOpenAI(AsyncOpenAI):
         default_query: Optional[Mapping[str, object]] = None,
         **kwargs: Any,
     ) -> None:
-        # build service endpoint by region when service_endpoint is empty,
-        # then build base url from service endpoint
-        if not service_endpoint and not region:
-            raise ValueError("Region or service endpoint must be provided.")
-        base_url = _build_base_url(
-            service_endpoint if service_endpoint else _build_service_endpoint(region)
-        )
+        base_url = _override_base_url(region, service_endpoint, base_url)
 
         http_client_headers = {
             COMPARTMENT_ID_HEADER: compartment_id,
@@ -327,40 +316,25 @@ class OciUserPrincipalAuth(HttpxOciAuth):
         )
 
 
-def _has_endpoint_path(url):
-    """
-    Detects if a URL has an endpoint path (i.e., something after the domain).
-    """
-    # This regex looks for:
-    # 1. 'https?://' (optional 's' for http/https)
-    # 2. '[^/]+' (one or more characters that are not a forward slash - the domain)
-    # 3. '/' (a literal forward slash, indicating the start of a path)
-    # 4. '.+' (one or more of any character, representing the path itself)
-    pattern = r"https?://[^/]+/.+"
-    return bool(re.search(pattern, url.rstrip("/")))
-
-
 def _build_service_endpoint(region: str) -> str:
     return f"https://inference.generativeai.{region}.oci.oraclecloud.com"
 
 
 def _build_base_url(service_endpoint: str) -> str:
-    # Normalize
-    url = service_endpoint.rstrip("/")
+    url = service_endpoint.rstrip(" /")
+    return f"{url}/openai/v1"
 
-    # If it's a Generative AI endpoint, append the inference path
-    if "generativeai" in url:
-        url = (
-            service_endpoint
-            if _has_endpoint_path(service_endpoint)
-            else f"{service_endpoint}/openai/v1"
+
+def _override_base_url(region: str = None, service_endpoint: str = None, base_url: str = None):
+    # build service endpoint by region when service_endpoint is empty,
+    # then build base url from service endpoint
+    if not base_url and not service_endpoint and not region:
+        raise ValueError("Region or service endpoint or base url must be provided.")
+    base_url = (
+        base_url
+        if base_url
+        else _build_base_url(
+            service_endpoint if service_endpoint else _build_service_endpoint(region)
         )
-        logger.debug("Detected Generative AI endpoint. Constructed full URL: %s", url)
-        return url
-
-    # If it's a Data Science model deployment endpoint, leave as is
-    logger.debug(
-        "Detected Model Deployment endpoint. Using service endpoint directly: %s",
-        url,
     )
-    return url
+    return base_url

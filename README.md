@@ -3,15 +3,7 @@
 [![PyPI - Version](https://img.shields.io/pypi/v/oci-openai.svg)](https://pypi.org/project/oci-openai)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/oci-openai.svg)](https://pypi.org/project/oci-openai)
 
-**OCI-OpenAI** is a client library jointly maintained by the **Oracle Cloud Infrastructure (OCI) Generative AI** and **OCI Data Science** teams.
-
-This package simplifies integration between **OpenAI’s Python SDK** and Oracle Cloud Infrastructure services — supporting both the **OCI Generative AI Service** and the **OCI Data Science Model Deployment** service.
-It provides robust authentication and authorization utilities that allow developers to securely connect to and invoke OCI-hosted large language models (LLMs) using standard OpenAI-compatible APIs.
-
-By leveraging this library, you can:
-- Seamlessly connect to **OCI Generative AI** endpoints.
-- Interact with **OCI Data Science Model Deployment** LLM endpoints using the same OpenAI-style interface.
-- Ensure compliance with OCI security and access control best practices.
+The **OCI OpenAI** Python library provides secure and convenient access to the OpenAI-compatible REST API hosted by **OCI Generative AI Service** and **OCI Data Science Model Deployment** Service.
 
 ---
 
@@ -109,7 +101,7 @@ client = OpenAI(
     base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
     http_client=httpx.Client(
         auth=OciUserPrincipalAuth(profile_name="DEFAULT"), 
-        headers={"CompartmentId": COMPARTMENT_ID}
+        headers={"opc-compartment-id": COMPARTMENT_ID}
     ),
 )
 
@@ -175,7 +167,7 @@ print(ai_msg)
 from oci_openai import OciOpenAI, OciSessionAuth
 
 client = OciOpenAI(
-    service_endpoint="https://modeldeployment.us-ashburn-1.oci.customer-oci.com/<OCID>/predict/v1",
+    base_url="https://modeldeployment.us-ashburn-1.oci.customer-oci.com/<OCID>/predict/v1",
     auth=OciSessionAuth(profile_name="<profile name>")
 )
 
@@ -199,7 +191,7 @@ from oci_openai import AsyncOciOpenAI, OciSessionAuth
 
 # Example for OCI Data Science Model Deployment endpoint
 client = AsyncOciOpenAI(
-    service_endpoint="https://modeldeployment.us-ashburn-1.oci.customer-oci.com/<OCID>/predict/v1",
+    base_url="https://modeldeployment.us-ashburn-1.oci.customer-oci.com/<OCID>/predict/v1",
     auth=OciSessionAuth(profile_name="<profile name>")
 )
 

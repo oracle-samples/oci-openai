@@ -13,7 +13,7 @@ from oci_openai import (
     OciSessionAuth,
     OciUserPrincipalAuth,
 )
-from oci_openai.oci_openai import _build_base_url, _build_service_endpoint, _has_endpoint_path
+from oci_openai.oci_openai import _build_base_url, _build_service_endpoint, _override_base_url
 
 SERVICE_ENDPOINT = "https://generativeai.fake-oci-endpoint.com"
 COMPARTMENT_ID = "ocid1.compartment.oc1..exampleuniqueID"
@@ -112,24 +112,6 @@ def test_oci_openai_auth_headers(client_factory, respx_mock):
     assert str(route.calls[0].request.url).startswith(SERVICE_ENDPOINT)
 
 
-def test_has_endpoint_path():
-    urls_with_paths = [
-        "https://example.com/users/123",
-        "http://www.google.com/search?q=python+regex",
-        "https://api.myservice.com/v1/data",
-    ]
-    for url in urls_with_paths:
-        assert _has_endpoint_path(url)
-
-    urls_without_paths = [
-        "https://example.com",
-        "http://www.google.com/",
-        "https://api.myservice.com//",
-    ]
-    for url in urls_without_paths:
-        assert not _has_endpoint_path(url)
-
-
 def test_build_service_endpoint():
     """Test that the function resolve Generative AI service endpoint by region."""
     result = _build_service_endpoint("us-chicago-1")
@@ -138,17 +120,27 @@ def test_build_service_endpoint():
 
 def test_build_base_url():
     """Test that the function appends the inference path for Generative AI endpoints."""
-
-    endpoint = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1"
-    result = _build_base_url(service_endpoint=endpoint)
-    assert result == endpoint
-
     endpoint = "https://ppe.inference.generativeai.us-chicago-1.oci.oraclecloud.com"
     result = _build_base_url(service_endpoint=endpoint)
     assert result == f"{endpoint}/openai/v1"
 
-    endpoint = (
-        "https://datascience.us-phoenix-1.oci.oraclecloud.com/20190101/actions/invokeEndpoint"
-    )
-    result = _build_base_url(service_endpoint=endpoint)
-    assert result == endpoint
+
+def test_override_base_url():
+    with pytest.raises(ValueError):
+        _override_base_url()
+
+    url = "https://datascience.us-phoenix-1.oci.oraclecloud.com/20190101/actions/invokeEndpoint"
+    result = _override_base_url(region="any", service_endpoint="any", base_url=url)
+    assert result == url
+
+    expected_url = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1"
+    endpoint = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
+    result = _override_base_url(region="any", service_endpoint=endpoint)
+    assert result == expected_url
+
+    endpoint = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/ //"
+    result = _override_base_url(region="any", service_endpoint=endpoint)
+    assert result == expected_url
+
+    result = _override_base_url("us-chicago-1")
+    assert result == expected_url

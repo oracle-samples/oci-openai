@@ -4,9 +4,7 @@ COMPARTMENT_ID = ""
 CONVERSATION_STORE_ID = ""
 OVERRIDE_URL = ""
 PROFILE_NAME = "oc1"
-MODEL = "openai.gpt-4o"
 REGION = ""
-PROMPT = "Tell me a three sentence bedtime story about a unicorn."
 
 
 oci_openai_client = OciOpenAI(

@@ -13,7 +13,12 @@ from oci_openai import (
     OciSessionAuth,
     OciUserPrincipalAuth,
 )
-from oci_openai.oci_openai import _build_base_url, _build_service_endpoint, _override_base_url
+from oci_openai.oci_openai import (
+    _build_base_url,
+    _build_headers,
+    _build_service_endpoint,
+    _override_base_url,
+)
 
 SERVICE_ENDPOINT = "https://generativeai.fake-oci-endpoint.com"
 COMPARTMENT_ID = "ocid1.compartment.oc1..exampleuniqueID"
@@ -107,7 +112,7 @@ def test_oci_openai_auth_headers(client_factory, respx_mock):
     client.completions.create(model="test-model", prompt="hello")
     assert route.called
     sent_headers = route.calls[0].request.headers
-    assert sent_headers["compartmentId"] == COMPARTMENT_ID
+    assert sent_headers["CompartmentId"] == COMPARTMENT_ID
     assert sent_headers["opc-compartment-id"] == COMPARTMENT_ID
     assert str(route.calls[0].request.url).startswith(SERVICE_ENDPOINT)
 
@@ -144,3 +149,23 @@ def test_override_base_url():
 
     result = _override_base_url("us-chicago-1")
     assert result == expected_url
+
+
+def test_build_headers():
+    result = _build_headers()
+    assert len(result) == 0
+
+    result = _build_headers(None, CONVERSATION_STORE_ID)
+    assert "CompartmentId" not in result
+    assert "opc-compartment-id" not in result
+    assert result["opc-conversation-store-id"] == CONVERSATION_STORE_ID
+
+    result = _build_headers(COMPARTMENT_ID, None)
+    assert result["CompartmentId"] == COMPARTMENT_ID
+    assert result["opc-compartment-id"] == COMPARTMENT_ID
+    assert "opc-conversation-store-id" not in result
+
+    result = _build_headers(COMPARTMENT_ID, CONVERSATION_STORE_ID)
+    assert result["CompartmentId"] == COMPARTMENT_ID
+    assert result["opc-compartment-id"] == COMPARTMENT_ID
+    assert result["opc-conversation-store-id"] == CONVERSATION_STORE_ID

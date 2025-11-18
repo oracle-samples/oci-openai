@@ -35,13 +35,15 @@ class OciOpenAI(OpenAI):
     handling authentication and request signing specific to OCI.
 
     Attributes:
-        region (str): The OCI service region, e.g., 'us-chicago-1'.
-                      Must be provided if service_endpoint is None
-        service_endpoint (str): The OCI service endpoint URL. when service_endpoint
-                                provided, the region will be ignored.
         auth (httpx.Auth): Authentication handler for OCI request signing.
-        compartment_id (str | None): Optional OCI compartment OCID for resource
-                                     isolation.
+        region (str | None): The OCI service region, e.g., 'us-chicago-1'.
+                             Must be provided if service_endpoint is None
+        service_endpoint (str | None): The OCI service endpoint. when service_endpoint
+                                       provided, the region will be ignored.
+        base_url (str | None): The OCI service full path URL. when base_url provided, the region
+                               and service_endpoint will be ignored.
+        compartment_id (str | None): OCI compartment OCID for resource isolation, required for
+                                     Generative AI Service, Optional for Data Science Service
         timeout (float | Timeout | None | NotGiven): Request timeout configuration.
         max_retries (int): Maximum number of retry attempts for failed requests.
         default_headers (Mapping[str, str] | None): Default HTTP headers.
@@ -51,11 +53,11 @@ class OciOpenAI(OpenAI):
     def __init__(
         self,
         *,
+        auth: httpx.Auth,
         region: str = None,
         service_endpoint: str = None,
         base_url: str = None,
-        auth: httpx.Auth,
-        compartment_id: str,
+        compartment_id: str = None,
         conversation_store_id: Optional[str] = None,
         timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
         max_retries: int = DEFAULT_MAX_RETRIES,
@@ -65,12 +67,11 @@ class OciOpenAI(OpenAI):
     ) -> None:
         base_url = _override_base_url(region, service_endpoint, base_url)
 
-        http_client_headers = {
-            COMPARTMENT_ID_HEADER: compartment_id,  # for backward compatibility
-            OPC_COMPARTMENT_ID_HEADER: compartment_id,
-        }
-        if conversation_store_id:
-            http_client_headers[CONVERSATION_STORE_ID_HEADER] = conversation_store_id
+        if "generativeai" in base_url and not compartment_id:
+            raise ValueError(
+                "The compartment_id is required to access the OCI Generative AI Service."
+            )
+        http_client_headers = _build_headers(compartment_id, conversation_store_id)
 
         super().__init__(
             api_key=API_KEY,
@@ -96,11 +97,15 @@ class AsyncOciOpenAI(AsyncOpenAI):
     handling OCI-specific authentication and request signing.
 
     Attributes:
-        region (str): The OCI service region, e.g., 'us-chicago-1'.
-                      Must be provided if service_endpoint is None
-        service_endpoint (str): The OCI service endpoint URL. when service_endpoint
-                                provided, the region will be ignored.
         auth (httpx.Auth): Authentication handler for OCI request signing.
+        region (str | None): The OCI service region, e.g., 'us-chicago-1'.
+                             Must be provided if service_endpoint is None
+        service_endpoint (str | None): The OCI service endpoint. when service_endpoint
+                                       provided, the region will be ignored.
+        base_url (str | None): The OCI service full path URL. when base_url provided, the region
+                               and service_endpoint will be ignored.
+        compartment_id (str | None): OCI compartment OCID for resource isolation, required for
+                                     Generative AI Service, Optional for Data Science Service
         compartment_id (str | None): Optional OCI compartment OCID.
         timeout (float | Timeout | None | NotGiven): Request timeout configuration.
         max_retries (int): Max retry attempts for failed requests.
@@ -111,10 +116,10 @@ class AsyncOciOpenAI(AsyncOpenAI):
     def __init__(
         self,
         *,
+        auth: httpx.Auth,
         region: str = None,
         service_endpoint: str = None,
         base_url: str = None,
-        auth: httpx.Auth,
         compartment_id: Optional[str] = None,
         conversation_store_id: Optional[str] = None,
         timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
@@ -125,12 +130,11 @@ class AsyncOciOpenAI(AsyncOpenAI):
     ) -> None:
         base_url = _override_base_url(region, service_endpoint, base_url)
 
-        http_client_headers = {
-            COMPARTMENT_ID_HEADER: compartment_id,
-            OPC_COMPARTMENT_ID_HEADER: compartment_id,
-        }
-        if conversation_store_id:
-            http_client_headers[CONVERSATION_STORE_ID_HEADER] = conversation_store_id
+        if "generativeai" in base_url and not compartment_id:
+            raise ValueError(
+                "The compartment_id is required to access the OCI Generative AI Service."
+            )
+        http_client_headers = _build_headers(compartment_id, conversation_store_id)
 
         super().__init__(
             api_key=API_KEY,
@@ -338,3 +342,17 @@ def _override_base_url(region: str = None, service_endpoint: str = None, base_ur
         )
     )
     return base_url
+
+
+def _build_headers(compartment_id: str = None, conversation_store_id: str = None):
+    http_client_headers = (
+        {
+            COMPARTMENT_ID_HEADER: compartment_id,  # for backward compatibility
+            OPC_COMPARTMENT_ID_HEADER: compartment_id,
+        }
+        if compartment_id
+        else {}
+    )
+    if conversation_store_id:
+        http_client_headers[CONVERSATION_STORE_ID_HEADER] = conversation_store_id
+    return http_client_headers

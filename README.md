@@ -70,8 +70,8 @@ print(completion.model_dump_json())
 from oci_openai import AsyncOciOpenAI, OciSessionAuth
 
 client = AsyncOciOpenAI(
-    service_endpoint="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com",
     auth=OciSessionAuth(profile_name="<profile name>"),
+    region="us-chicago-1",
     compartment_id="<compartment ocid>",
 )
 

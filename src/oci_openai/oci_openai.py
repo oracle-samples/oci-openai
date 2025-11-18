@@ -63,8 +63,13 @@ class OciOpenAI(OpenAI):
         default_query: Optional[Mapping[str, object]] = None,
         **kwargs: Any,
     ) -> None:
-        # Build base_url
-        base_url = _build_service_url(region=region, service_endpoint=service_endpoint)
+        # build service endpoint by region when service_endpoint is empty,
+        # then build base url from service endpoint
+        if not service_endpoint and not region:
+            raise ValueError("Region or service endpoint must be provided.")
+        base_url = _build_base_url(
+            service_endpoint if service_endpoint else _build_service_endpoint(region)
+        )
 
         http_client_headers = {
             COMPARTMENT_ID_HEADER: compartment_id,  # for backward compatibility
@@ -123,8 +128,13 @@ class AsyncOciOpenAI(AsyncOpenAI):
         default_query: Optional[Mapping[str, object]] = None,
         **kwargs: Any,
     ) -> None:
-        # Build base_url
-        base_url = _build_service_url(region=region, service_endpoint=service_endpoint)
+        # build service endpoint by region when service_endpoint is empty,
+        # then build base url from service endpoint
+        if not service_endpoint and not region:
+            raise ValueError("Region or service endpoint must be provided.")
+        base_url = _build_base_url(
+            service_endpoint if service_endpoint else _build_service_endpoint(region)
+        )
 
         http_client_headers = {
             COMPARTMENT_ID_HEADER: compartment_id,
@@ -331,37 +341,26 @@ def _has_endpoint_path(url):
 
 
 def _build_service_endpoint(region: str) -> str:
-    base_url = f"https://inference.generativeai.{region}.oci.oraclecloud.com/openai/v1"
-    logger.debug(
-        "Detected region, constructed service full URL: %s",
-        base_url,
-    )
-    return base_url
+    return f"https://inference.generativeai.{region}.oci.oraclecloud.com"
 
 
 def _build_base_url(service_endpoint: str) -> str:
     # Normalize
-    base_url = service_endpoint.rstrip("/")
+    url = service_endpoint.rstrip("/")
 
     # If it's a Generative AI endpoint, append the inference path
-    if "generativeai" in base_url:
-        url = base_url if _has_endpoint_path(base_url) else f"{base_url}/openai/v1"
+    if "generativeai" in url:
+        url = (
+            service_endpoint
+            if _has_endpoint_path(service_endpoint)
+            else f"{service_endpoint}/openai/v1"
+        )
         logger.debug("Detected Generative AI endpoint. Constructed full URL: %s", url)
         return url
 
     # If it's a Data Science model deployment endpoint, leave as is
     logger.debug(
         "Detected Model Deployment endpoint. Using service endpoint directly: %s",
-        base_url,
+        url,
     )
-    return base_url
-
-
-def _build_service_url(region: str = None, service_endpoint: str = None) -> str:
-    """Constructs the service URL based on the provided endpoint."""
-    if service_endpoint:
-        return _build_base_url(service_endpoint)
-    elif region:
-        return _build_service_endpoint(region)
-    else:
-        raise ValueError("Region or service endpoint must be provided.")
+    return url

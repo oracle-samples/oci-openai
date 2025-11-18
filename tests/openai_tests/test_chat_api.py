@@ -13,7 +13,7 @@ from oci_openai import (
     OciSessionAuth,
     OciUserPrincipalAuth,
 )
-from oci_openai.oci_openai import _build_service_url, _has_endpoint_path
+from oci_openai.oci_openai import _build_base_url, _build_service_endpoint, _has_endpoint_path
 
 SERVICE_ENDPOINT = "https://generativeai.fake-oci-endpoint.com"
 COMPARTMENT_ID = "ocid1.compartment.oc1..exampleuniqueID"
@@ -130,25 +130,25 @@ def test_has_endpoint_path():
         assert not _has_endpoint_path(url)
 
 
-def test_build_service_url():
+def test_build_service_endpoint():
+    """Test that the function resolve Generative AI service endpoint by region."""
+    result = _build_service_endpoint("us-chicago-1")
+    assert result == "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
+
+
+def test_build_base_url():
     """Test that the function appends the inference path for Generative AI endpoints."""
 
-    with pytest.raises(ValueError):
-        _build_service_url()
-
     endpoint = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1"
-    result = _build_service_url(service_endpoint=endpoint)
+    result = _build_base_url(service_endpoint=endpoint)
     assert result == endpoint
 
-    result = _build_service_url(region="us-chicago-1")
-    assert result == "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1"
-
     endpoint = "https://ppe.inference.generativeai.us-chicago-1.oci.oraclecloud.com"
-    result = _build_service_url(region="any-region", service_endpoint=endpoint)
+    result = _build_base_url(service_endpoint=endpoint)
     assert result == f"{endpoint}/openai/v1"
 
     endpoint = (
         "https://datascience.us-phoenix-1.oci.oraclecloud.com/20190101/actions/invokeEndpoint"
     )
-    result = _build_service_url(service_endpoint=endpoint)
+    result = _build_base_url(service_endpoint=endpoint)
     assert result == endpoint

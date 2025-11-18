@@ -7,6 +7,7 @@ from oci_openai import OciInstancePrincipalAuth, OciResourcePrincipalAuth, OciSe
 from oci_openai.oci_openai import (
     COMPARTMENT_ID_HEADER,
     CONVERSATION_STORE_ID_HEADER,
+    _build_base_url,
     _build_service_endpoint,
 )
 
@@ -17,7 +18,7 @@ MODEL = "openai.gpt-4o"
 SESSION_PRINCIPAL = "session_principal"
 RESOURCE_PRINCIPAL = "resource_principal"
 INSTANCE_PRINCIPAL = "instance_principal"
-BASE_URL = _build_service_endpoint(region="us-chicago-1")
+BASE_URL = _build_base_url(_build_service_endpoint(region="us-chicago-1"))
 RESPONSES_URL = f"{BASE_URL}/responses"
 RESPONSE_ID = "resp_123"
 

@@ -7,7 +7,7 @@ name = "oci-openai"
 dynamic = ["version"]
 description = 'OCI authentication and authorization utilities for OpenAI python SDK'
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = "UPL-1.0"
 license-files = ["LICENSE.txt"]
 keywords = [
@@ -23,7 +23,6 @@ authors = [{ name = "Chao Yang", email = "chao.c.yang@oracle.com" }]
 classifiers = [
       "Intended Audience :: Developers",
       "Programming Language :: Python",
-      "Programming Language :: Python :: 3.8",
       "Programming Language :: Python :: 3.9",
       "Programming Language :: Python :: 3.10",
       "Programming Language :: Python :: 3.11",
@@ -48,7 +47,12 @@ dev = [
       "pytest>=8.3.2,<9.0.0",
       "pytest-cov>=5.0.0,<6.0.0",
       "respx",
-      "typing-extensions>=4.11, <5"
+      "typing-extensions>=4.11, <5",
+      "openai-agents>=0.5.1",
+      "pytest-mock",
+      "ag2[openai]",
+      "pytest-httpx",
+      "pytest-asyncio"
 ]
 
 [project.urls]
@@ -87,7 +91,7 @@ exclude_lines = [
 
 [tool.ruff]
 target-version = "py38"
-line-length = 88
+line-length = 100
 extend-exclude = [
 ]
 
@@ -105,6 +109,6 @@ select = [
 ]
 
 [tool.black]
-line-length = 88
+line-length = 100
 target-version = ['py38']
 exclude = '\.venv|build|dist'

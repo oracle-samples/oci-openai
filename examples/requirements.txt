@@ -1,0 +1,17 @@
+oci
+requests
+httpx
+openai-agents
+openai
+
+langchain
+langgraph
+langchain_core
+langchain_community
+fastmcp
+dotenv
+mcpo
+litellm
+rich
+yfinance
+matplotlib

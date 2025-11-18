@@ -1,7 +1,7 @@
 # Define the directory containing the source code
 SRC_DIR := ./src
 TEST_DIR := ./tests
-
+EXAMPLE_DIR := ./examples
 
 .PHONY: all
 all: test lint build
@@ -24,7 +24,7 @@ dev: ## Install development dependencies.
 
 .PHONY: test
 test: ## Run tests.
-	uv run --no-reinstall pytest $(TEST_DIR) --cov --cov-config=.coveragerc -vv -s
+	uv run --no-project --no-reinstall pytest $(TEST_DIR) --cov --cov-config=.coveragerc -vv -s
 
 .PHONY: clean
 clean: ## Remove build artifacts.
@@ -32,13 +32,13 @@ clean: ## Remove build artifacts.
 
 .PHONY: format
 format: ## Format code using ruff.
-	uv run --no-reinstall isort $(SRC_DIR) $(TEST_DIR)
-	uv run --no-reinstall ruff format $(SRC_DIR) $(TEST_DIR); uv run --no-reinstall ruff check --fix $(SRC_DIR) $(TEST_DIR)
+	uv run --no-project --no-reinstall isort $(SRC_DIR) $(TEST_DIR)
+	uv run --no-project --no-reinstall ruff format $(SRC_DIR) $(TEST_DIR); uv run --no-project --no-reinstall ruff check --fix $(SRC_DIR) $(TEST_DIR)
 
 .PHONY: lint
 lint: ## Run linters using ruff.
-	uv run --no-reinstall ruff format --diff $(SRC_DIR) $(TEST_DIR)
-	uv run --no-reinstall mypy $(SRC_DIR)
+	uv run --no-project --no-reinstall ruff format --diff $(SRC_DIR) $(TEST_DIR)
+	uv run --no-project --no-reinstall mypy $(SRC_DIR) $(TEST_DIR)
 
 .PHONY: check
 check: format lint ## Run format and lint.

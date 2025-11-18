@@ -106,7 +106,7 @@ from oci_openai import OciUserPrincipalAuth
 # Example for OCI Data Science Model Deployment endpoint
 client = OpenAI(
     api_key="OCI",
-    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1",
+    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
     http_client=httpx.Client(
         auth=OciUserPrincipalAuth(profile_name="DEFAULT"), 
         headers={"CompartmentId": COMPARTMENT_ID}
@@ -139,7 +139,7 @@ COMPARTMENT_ID=os.getenv("OCI_COMPARTMENT_ID", "<compartment_id>")
 llm = ChatOpenAI(
     model="<model-name>",  # for example "xai.grok-4-fast-reasoning"
     api_key="OCI",
-    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1",
+    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
     http_client=httpx.Client(
         auth=OciUserPrincipalAuth(profile_name="DEFAULT"), 
         headers={"CompartmentId": COMPARTMENT_ID}

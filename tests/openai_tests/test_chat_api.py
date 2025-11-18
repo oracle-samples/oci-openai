@@ -13,10 +13,11 @@ from oci_openai import (
     OciSessionAuth,
     OciUserPrincipalAuth,
 )
-from oci_openai.oci_openai import _build_service_url
+from oci_openai.oci_openai import _build_service_url, _has_endpoint_path
 
 SERVICE_ENDPOINT = "https://generativeai.fake-oci-endpoint.com"
 COMPARTMENT_ID = "ocid1.compartment.oc1..exampleuniqueID"
+CONVERSATION_STORE_ID = "ocid1.generativeaiconversationstore.oc1..exampleID"
 
 
 def create_oci_openai_client_with_session_auth():
@@ -29,11 +30,9 @@ def create_oci_openai_client_with_session_auth():
             "user": "dummy_user",
             "fingerprint": "dummy_fingerprint",
         },
-    ), patch(
-        "oci.signer.load_private_key_from_file", return_value="dummy_private_key"
-    ), patch("oci.auth.signers.SecurityTokenSigner", return_value=MagicMock()), patch(
-        "builtins.open", create=True
-    ) as mock_open:
+    ), patch("oci.signer.load_private_key_from_file", return_value="dummy_private_key"), patch(
+        "oci.auth.signers.SecurityTokenSigner", return_value=MagicMock()
+    ), patch("builtins.open", create=True) as mock_open:
         mock_open.return_value.__enter__.return_value.read.return_value = "dummy_token"
         auth = OciSessionAuth()
         client = OciOpenAI(
@@ -45,9 +44,7 @@ def create_oci_openai_client_with_session_auth():
 
 
 def create_oci_openai_client_with_resource_principal_auth():
-    with patch(
-        "oci.auth.signers.get_resource_principals_signer", return_value=MagicMock()
-    ):
+    with patch("oci.auth.signers.get_resource_principals_signer", return_value=MagicMock()):
         auth = OciResourcePrincipalAuth()
         client = OciOpenAI(
             service_endpoint=SERVICE_ENDPOINT,
@@ -104,23 +101,54 @@ auth_client_factories = [
 @pytest.mark.respx()
 def test_oci_openai_auth_headers(client_factory, respx_mock):
     client = client_factory()
-    route = respx_mock.post(f"{SERVICE_ENDPOINT}/20231130/actions/v1/completions").mock(
+    route = respx_mock.post(f"{SERVICE_ENDPOINT}/openai/v1/completions").mock(
         return_value=httpx.Response(200, json={"result": "ok"})
     )
     client.completions.create(model="test-model", prompt="hello")
     assert route.called
     sent_headers = route.calls[0].request.headers
     assert sent_headers["compartmentId"] == COMPARTMENT_ID
+    assert sent_headers["opc-compartment-id"] == COMPARTMENT_ID
     assert str(route.calls[0].request.url).startswith(SERVICE_ENDPOINT)
+
+
+def test_has_endpoint_path():
+    urls_with_paths = [
+        "https://example.com/users/123",
+        "http://www.google.com/search?q=python+regex",
+        "https://api.myservice.com/v1/data",
+    ]
+    for url in urls_with_paths:
+        assert _has_endpoint_path(url)
+
+    urls_without_paths = [
+        "https://example.com",
+        "http://www.google.com/",
+        "https://api.myservice.com//",
+    ]
+    for url in urls_without_paths:
+        assert not _has_endpoint_path(url)
 
 
 def test_build_service_url():
     """Test that the function appends the inference path for Generative AI endpoints."""
 
-    endpoint = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
-    result = _build_service_url(endpoint)
-    assert result == f"{endpoint}/20231130/actions/v1"
+    with pytest.raises(ValueError):
+        _build_service_url()
 
-    endpoint = "https://datascience.us-phoenix-1.oci.oraclecloud.com/20190101/actions/invokeEndpoint"
-    result = _build_service_url(endpoint)
+    endpoint = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1"
+    result = _build_service_url(service_endpoint=endpoint)
+    assert result == endpoint
+
+    result = _build_service_url(region="us-chicago-1")
+    assert result == "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1"
+
+    endpoint = "https://ppe.inference.generativeai.us-chicago-1.oci.oraclecloud.com"
+    result = _build_service_url(region="any-region", service_endpoint=endpoint)
+    assert result == f"{endpoint}/openai/v1"
+
+    endpoint = (
+        "https://datascience.us-phoenix-1.oci.oraclecloud.com/20190101/actions/invokeEndpoint"
+    )
+    result = _build_service_url(service_endpoint=endpoint)
     assert result == endpoint

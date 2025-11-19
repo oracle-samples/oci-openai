@@ -3,15 +3,7 @@
 [![PyPI - Version](https://img.shields.io/pypi/v/oci-openai.svg)](https://pypi.org/project/oci-openai)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/oci-openai.svg)](https://pypi.org/project/oci-openai)
 
-**OCI-OpenAI** is a client library jointly maintained by the **Oracle Cloud Infrastructure (OCI) Generative AI** and **OCI Data Science** teams.
-
-This package simplifies integration between **OpenAI’s Python SDK** and Oracle Cloud Infrastructure services — supporting both the **OCI Generative AI Service** and the **OCI Data Science Model Deployment** service.
-It provides robust authentication and authorization utilities that allow developers to securely connect to and invoke OCI-hosted large language models (LLMs) using standard OpenAI-compatible APIs.
-
-By leveraging this library, you can:
-- Seamlessly connect to **OCI Generative AI** endpoints.
-- Interact with **OCI Data Science Model Deployment** LLM endpoints using the same OpenAI-style interface.
-- Ensure compliance with OCI security and access control best practices.
+The **OCI OpenAI** Python library provides secure and convenient access to the OpenAI-compatible REST API hosted by **OCI Generative AI Service** and **OCI Data Science Model Deployment** Service.
 
 ---
 
@@ -78,8 +70,8 @@ print(completion.model_dump_json())
 from oci_openai import AsyncOciOpenAI, OciSessionAuth
 
 client = AsyncOciOpenAI(
-    service_endpoint="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com",
     auth=OciSessionAuth(profile_name="<profile name>"),
+    region="us-chicago-1",
     compartment_id="<compartment ocid>",
 )
 
@@ -106,10 +98,10 @@ from oci_openai import OciUserPrincipalAuth
 # Example for OCI Generative AI endpoint
 client = OpenAI(
     api_key="OCI",
-    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1",
+    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
     http_client=httpx.Client(
-        auth=OciUserPrincipalAuth(profile_name="DEFAULT"), 
-        headers={"CompartmentId": COMPARTMENT_ID}
+        auth=OciUserPrincipalAuth(profile_name="DEFAULT"),
+        headers={"opc-compartment-id": COMPARTMENT_ID}
     ),
 )
 
@@ -139,9 +131,9 @@ COMPARTMENT_ID=os.getenv("OCI_COMPARTMENT_ID", "<compartment_id>")
 llm = ChatOpenAI(
     model="<model-name>",  # for example "xai.grok-4-fast-reasoning"
     api_key="OCI",
-    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1",
+    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
     http_client=httpx.Client(
-        auth=OciUserPrincipalAuth(profile_name="DEFAULT"), 
+        auth=OciUserPrincipalAuth(profile_name="DEFAULT"),
         headers={"CompartmentId": COMPARTMENT_ID}
     ),
     # use_responses_api=True
@@ -175,7 +167,7 @@ print(ai_msg)
 from oci_openai import OciOpenAI, OciSessionAuth
 
 client = OciOpenAI(
-    service_endpoint="https://modeldeployment.us-ashburn-1.oci.customer-oci.com/<OCID>/predict/v1",
+    base_url="https://modeldeployment.us-ashburn-1.oci.customer-oci.com/<OCID>/predict/v1",
     auth=OciSessionAuth(profile_name="<profile name>")
 )
 
@@ -199,7 +191,7 @@ from oci_openai import AsyncOciOpenAI, OciSessionAuth
 
 # Example for OCI Data Science Model Deployment endpoint
 client = AsyncOciOpenAI(
-    service_endpoint="https://modeldeployment.us-ashburn-1.oci.customer-oci.com/<OCID>/predict/v1",
+    base_url="https://modeldeployment.us-ashburn-1.oci.customer-oci.com/<OCID>/predict/v1",
     auth=OciSessionAuth(profile_name="<profile name>")
 )
 

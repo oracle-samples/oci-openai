@@ -20,6 +20,11 @@ logger = logging.getLogger(__name__)
 
 OciAuthSigner = Type[oci.signer.AbstractBaseSigner]
 
+API_KEY = "<NOTUSED>"
+COMPARTMENT_ID_HEADER = "CompartmentId"
+OPC_COMPARTMENT_ID_HEADER = "opc-compartment-id"
+CONVERSATION_STORE_ID_HEADER = "opc-conversation-store-id"
+
 
 class OciOpenAI(OpenAI):
     """
@@ -30,9 +35,15 @@ class OciOpenAI(OpenAI):
     handling authentication and request signing specific to OCI.
 
     Attributes:
-        service_endpoint (str): The OCI service endpoint URL.
         auth (httpx.Auth): Authentication handler for OCI request signing.
-        compartment_id (str | None): Optional OCI compartment OCID for resource isolation.
+        region (str | None): The OCI service region, e.g., 'us-chicago-1'.
+                             Must be provided if service_endpoint and base_url are None
+        service_endpoint (str | None): The OCI service endpoint. when service_endpoint
+                                       provided, the region will be ignored.
+        base_url (str | None): The OCI service full path URL. when base_url provided, the region
+                               and service_endpoint will be ignored.
+        compartment_id (str | None): OCI compartment OCID for resource isolation, required for
+                                     Generative AI Service, Optional for Data Science Service
         timeout (float | Timeout | None | NotGiven): Request timeout configuration.
         max_retries (int): Maximum number of retry attempts for failed requests.
         default_headers (Mapping[str, str] | None): Default HTTP headers.
@@ -42,25 +53,28 @@ class OciOpenAI(OpenAI):
     def __init__(
         self,
         *,
-        service_endpoint: str,
         auth: httpx.Auth,
-        compartment_id: Optional[str] = None,
+        region: str = None,
+        service_endpoint: str = None,
+        base_url: str = None,
+        compartment_id: str = None,
+        conversation_store_id: Optional[str] = None,
         timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Optional[Mapping[str, str]] = None,
         default_query: Optional[Mapping[str, object]] = None,
         **kwargs: Any,
     ) -> None:
-        # Build base_url
-        base_url = _build_service_url(service_endpoint=service_endpoint)
+        base_url = _resolve_base_url(region, service_endpoint, base_url)
 
-        # Only set http client headers if we actually have a compartment_id
-        http_client_headers = (
-            {"CompartmentId": compartment_id} if compartment_id else None
-        )
+        if "generativeai" in base_url and not compartment_id:
+            raise ValueError(
+                "The compartment_id is required to access the OCI Generative AI Service."
+            )
+        http_client_headers = _build_headers(compartment_id, conversation_store_id)
 
         super().__init__(
-            api_key="<NOTUSED>",
+            api_key=API_KEY,
             base_url=base_url,
             timeout=timeout,
             max_retries=max_retries,
@@ -83,9 +97,15 @@ class AsyncOciOpenAI(AsyncOpenAI):
     handling OCI-specific authentication and request signing.
 
     Attributes:
-        service_endpoint (str): OCI service endpoint URL.
         auth (httpx.Auth): Authentication handler for OCI request signing.
-        compartment_id (str | None): Optional OCI compartment OCID.
+        region (str | None): The OCI service region, e.g., 'us-chicago-1'.
+                             Must be provided if service_endpoint and base_url are None
+        service_endpoint (str | None): The OCI service endpoint. when service_endpoint
+                                       provided, the region will be ignored.
+        base_url (str | None): The OCI service full path URL. when base_url provided, the region
+                               and service_endpoint will be ignored.
+        compartment_id (str | None): OCI compartment OCID for resource isolation, required for
+                                     Generative AI Service, Optional for Data Science Service
         timeout (float | Timeout | None | NotGiven): Request timeout configuration.
         max_retries (int): Max retry attempts for failed requests.
         default_headers (Mapping[str, str] | None): Default HTTP headers.
@@ -95,25 +115,28 @@ class AsyncOciOpenAI(AsyncOpenAI):
     def __init__(
         self,
         *,
-        service_endpoint: str,
         auth: httpx.Auth,
+        region: str = None,
+        service_endpoint: str = None,
+        base_url: str = None,
         compartment_id: Optional[str] = None,
+        conversation_store_id: Optional[str] = None,
         timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Optional[Mapping[str, str]] = None,
         default_query: Optional[Mapping[str, object]] = None,
         **kwargs: Any,
     ) -> None:
-        # Build base_url
-        base_url = _build_service_url(service_endpoint=service_endpoint)
+        base_url = _resolve_base_url(region, service_endpoint, base_url)
 
-        # Only set http client headers if we actually have a compartment_id
-        http_client_headers = (
-            {"CompartmentId": compartment_id} if compartment_id else None
-        )
+        if "generativeai" in base_url and not compartment_id:
+            raise ValueError(
+                "The compartment_id is required to access the OCI Generative AI Service."
+            )
+        http_client_headers = _build_headers(compartment_id, conversation_store_id)
 
         super().__init__(
-            api_key="<NOTUSED>",
+            api_key=API_KEY,
             base_url=base_url,
             timeout=timeout,
             max_retries=max_retries,
@@ -143,9 +166,7 @@ class HttpxOciAuth(httpx.Auth):
         self.signer = signer
 
     @override
-    def auth_flow(
-        self, request: httpx.Request
-    ) -> Generator[httpx.Request, httpx.Response, None]:
+    def auth_flow(self, request: httpx.Request) -> Generator[httpx.Request, httpx.Response, None]:
         # Read the request content to handle streaming requests properly
         try:
             content = request.content
@@ -195,7 +216,8 @@ class OciSessionAuth(HttpxOciAuth):
         config_file : str, optional
             Path to the OCI configuration file. Defaults to `~/.oci/config`.
         profile_name : str, optional
-            Profile name inside the OCI configuration file to use. Defaults to "DEFAULT".
+            Profile name inside the OCI configuration file to use.
+            Defaults to "DEFAULT".
         **kwargs : Mapping[str, Any]
             Optional keyword arguments:
               - `generic_headers`: Optional[Dict[str, str]]
@@ -221,10 +243,8 @@ class OciSessionAuth(HttpxOciAuth):
         # Load the private key from config
         key_path = config.get("key_file")
         if not key_path:
-            raise KeyError(
-                f"Missing 'key_file' entry in OCI config profile '{profile_name}'."
-            )
-        private_key = oci.signer.load_private_key_from_file(key_path)
+            raise KeyError(f"Missing 'key_file' entry in OCI config profile '{profile_name}'.")
+        private_key = self._load_private_key(config)
 
         # Optional signer header customization
         generic_headers = kwargs.pop("generic_headers", None)
@@ -236,14 +256,15 @@ class OciSessionAuth(HttpxOciAuth):
         if body_headers:
             additional_kwargs["body_headers"] = body_headers
 
-        self.signer = oci.auth.signers.SecurityTokenSigner(
-            token, private_key, **additional_kwargs
-        )
+        self.signer = oci.auth.signers.SecurityTokenSigner(token, private_key, **additional_kwargs)
 
     def _load_token(self, config: Mapping[str, Any]) -> str:
         token_file = config["security_token_file"]
         with open(token_file, "r") as f:
             return f.read().strip()
+
+    def _load_private_key(self, config: Any) -> str:
+        return oci.signer.load_private_key_from_file(config["key_file"])
 
 
 class OciResourcePrincipalAuth(HttpxOciAuth):
@@ -255,8 +276,8 @@ class OciResourcePrincipalAuth(HttpxOciAuth):
     OCI services.
     """
 
-    def __init__(self):
-        self.signer = oci.auth.signers.get_resource_principals_signer()  # type: ignore
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(signer=oci.auth.signers.get_resource_principals_signer(**kwargs))
 
 
 class OciInstancePrincipalAuth(HttpxOciAuth):
@@ -267,8 +288,8 @@ class OciInstancePrincipalAuth(HttpxOciAuth):
     which is suitable for compute instances that need to access OCI services.
     """
 
-    def __init__(self, **kwargs: Mapping[str, Any]):
-        self.signer = oci.auth.signers.InstancePrincipalsSecurityTokenSigner(**kwargs)
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(signer=oci.auth.signers.InstancePrincipalsSecurityTokenSigner(**kwargs))
 
 
 class OciUserPrincipalAuth(HttpxOciAuth):
@@ -284,7 +305,7 @@ class OciUserPrincipalAuth(HttpxOciAuth):
 
     def __init__(
         self, config_file: str = DEFAULT_LOCATION, profile_name: str = DEFAULT_PROFILE
-    ):
+    ) -> None:
         config = oci.config.from_file(config_file, profile_name)
         oci.config.validate_config(config)  # type: ignore
 
@@ -298,24 +319,39 @@ class OciUserPrincipalAuth(HttpxOciAuth):
         )
 
 
-def _build_service_url(service_endpoint: str) -> str:
-    """Constructs the service URL based on the provided endpoint."""
+def _build_service_endpoint(region: str) -> str:
+    return f"https://inference.generativeai.{region}.oci.oraclecloud.com"
 
-    if not service_endpoint:
-        raise ValueError("Service endpoint must be provided.")
 
-    # Normalize
-    base_url = service_endpoint.rstrip("/")
+def _build_base_url(service_endpoint: str) -> str:
+    url = service_endpoint.rstrip(" /")
+    return f"{url}/openai/v1"
 
-    # If it's a Generative AI endpoint, append the inference path
-    if "generativeai" in base_url:
-        url = f"{base_url}/20231130/actions/v1"
-        logger.debug("Detected Generative AI endpoint. Constructed full URL: %s", url)
-        return url
 
-    # If it's a Data Science model deployment endpoint, leave as is
-    logger.debug(
-        "Detected Model Deployment endpoint. Using service endpoint directly: %s",
-        base_url,
+def _resolve_base_url(region: str = None, service_endpoint: str = None, base_url: str = None):
+    # build service endpoint by region when service_endpoint is empty,
+    # then build base url from service endpoint
+    if not base_url and not service_endpoint and not region:
+        raise ValueError("Region or service endpoint or base url must be provided.")
+    base_url = (
+        base_url
+        if base_url
+        else _build_base_url(
+            service_endpoint if service_endpoint else _build_service_endpoint(region)
+        )
     )
     return base_url
+
+
+def _build_headers(compartment_id: str = None, conversation_store_id: str = None):
+    http_client_headers = (
+        {
+            COMPARTMENT_ID_HEADER: compartment_id,  # for backward compatibility
+            OPC_COMPARTMENT_ID_HEADER: compartment_id,
+        }
+        if compartment_id
+        else {}
+    )
+    if conversation_store_id:
+        http_client_headers[CONVERSATION_STORE_ID_HEADER] = conversation_store_id
+    return http_client_headers

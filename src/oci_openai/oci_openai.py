@@ -325,7 +325,7 @@ def _build_service_endpoint(region: str) -> str:
 
 def _build_base_url(service_endpoint: str) -> str:
     url = service_endpoint.rstrip(" /")
-    return f"{url}/openai/v1"
+    return f"{url}/v1"
 
 
 def _resolve_base_url(region: str = None, service_endpoint: str = None, base_url: str = None):

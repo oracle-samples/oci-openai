@@ -37,7 +37,7 @@ class OciOpenAI(OpenAI):
     Attributes:
         auth (httpx.Auth): Authentication handler for OCI request signing.
         region (str | None): The OCI service region, e.g., 'us-chicago-1'.
-                             Must be provided if service_endpoint is None
+                             Must be provided if service_endpoint and base_url are None
         service_endpoint (str | None): The OCI service endpoint. when service_endpoint
                                        provided, the region will be ignored.
         base_url (str | None): The OCI service full path URL. when base_url provided, the region
@@ -99,14 +99,13 @@ class AsyncOciOpenAI(AsyncOpenAI):
     Attributes:
         auth (httpx.Auth): Authentication handler for OCI request signing.
         region (str | None): The OCI service region, e.g., 'us-chicago-1'.
-                             Must be provided if service_endpoint is None
+                             Must be provided if service_endpoint and base_url are None
         service_endpoint (str | None): The OCI service endpoint. when service_endpoint
                                        provided, the region will be ignored.
         base_url (str | None): The OCI service full path URL. when base_url provided, the region
                                and service_endpoint will be ignored.
         compartment_id (str | None): OCI compartment OCID for resource isolation, required for
                                      Generative AI Service, Optional for Data Science Service
-        compartment_id (str | None): Optional OCI compartment OCID.
         timeout (float | Timeout | None | NotGiven): Request timeout configuration.
         max_retries (int): Max retry attempts for failed requests.
         default_headers (Mapping[str, str] | None): Default HTTP headers.

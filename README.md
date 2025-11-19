@@ -100,7 +100,7 @@ client = OpenAI(
     api_key="OCI",
     base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
     http_client=httpx.Client(
-        auth=OciUserPrincipalAuth(profile_name="DEFAULT"), 
+        auth=OciUserPrincipalAuth(profile_name="DEFAULT"),
         headers={"opc-compartment-id": COMPARTMENT_ID}
     ),
 )
@@ -133,7 +133,7 @@ llm = ChatOpenAI(
     api_key="OCI",
     base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
     http_client=httpx.Client(
-        auth=OciUserPrincipalAuth(profile_name="DEFAULT"), 
+        auth=OciUserPrincipalAuth(profile_name="DEFAULT"),
         headers={"CompartmentId": COMPARTMENT_ID}
     ),
     # use_responses_api=True

@@ -65,7 +65,7 @@ class OciOpenAI(OpenAI):
         default_query: Optional[Mapping[str, object]] = None,
         **kwargs: Any,
     ) -> None:
-        base_url = _override_base_url(region, service_endpoint, base_url)
+        base_url = _resolve_base_url(region, service_endpoint, base_url)
 
         if "generativeai" in base_url and not compartment_id:
             raise ValueError(
@@ -127,7 +127,7 @@ class AsyncOciOpenAI(AsyncOpenAI):
         default_query: Optional[Mapping[str, object]] = None,
         **kwargs: Any,
     ) -> None:
-        base_url = _override_base_url(region, service_endpoint, base_url)
+        base_url = _resolve_base_url(region, service_endpoint, base_url)
 
         if "generativeai" in base_url and not compartment_id:
             raise ValueError(
@@ -328,7 +328,7 @@ def _build_base_url(service_endpoint: str) -> str:
     return f"{url}/openai/v1"
 
 
-def _override_base_url(region: str = None, service_endpoint: str = None, base_url: str = None):
+def _resolve_base_url(region: str = None, service_endpoint: str = None, base_url: str = None):
     # build service endpoint by region when service_endpoint is empty,
     # then build base url from service endpoint
     if not base_url and not service_endpoint and not region:

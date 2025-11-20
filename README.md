@@ -47,7 +47,7 @@ pip install oci-openai
 from oci_openai import OciOpenAI, OciSessionAuth
 
 client = OciOpenAI(
-    service_endpoint="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com",
+    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1",
     auth=OciSessionAuth(profile_name="<profile name>"),
     compartment_id="<compartment ocid>",
 )

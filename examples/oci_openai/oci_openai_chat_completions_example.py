@@ -10,10 +10,9 @@ logging.basicConfig(level=logging.DEBUG)
 
 def main():
     client = OciOpenAI(
-        # region="us-chicago-1",
-        service_endpoint="https://ppe.inference.generativeai.us-chicago-1.oci.oraclecloud.com",
+        base_url="https://ppe.inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1",
         auth=OciSessionAuth(profile_name="oc1"),
-        compartment_id="ocid1.tenancy.oc1..aaaaaaaaumuuscymm6yb3wsbaicfx3mjhesghplvrvamvbypyehh5pgaasna",
+        compartment_id="ocid1.tenancy.oc1..dummy",
     )
     model = "meta.llama-4-scout-17b-16e-instruct"
 

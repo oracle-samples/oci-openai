@@ -40,6 +40,8 @@ pip install oci-openai
 ## Examples
 
 ### OCI Generative AI
+Notes:
+- **Cohere models do not support OpenAI-compatible API**
 
 #### Using the OCI OpenAI Synchronous Client
 

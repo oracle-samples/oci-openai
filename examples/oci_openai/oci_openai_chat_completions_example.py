@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 def main():
     client = OciOpenAI(
-        base_url="https://ppe.inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1",
+        base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1",
         auth=OciSessionAuth(profile_name="oc1"),
         compartment_id="ocid1.tenancy.oc1..dummy",
     )

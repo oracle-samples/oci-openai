@@ -100,7 +100,7 @@ from oci_openai import OciUserPrincipalAuth
 # Example for OCI Generative AI endpoint
 client = OpenAI(
     api_key="OCI",
-    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
+    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1",
     http_client=httpx.Client(
         auth=OciUserPrincipalAuth(profile_name="DEFAULT"),
         headers={"opc-compartment-id": COMPARTMENT_ID}

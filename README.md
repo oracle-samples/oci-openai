@@ -33,14 +33,16 @@ The **OCI OpenAI** Python library provides secure and convenient access to the O
 
 ```console
 pip install oci-openai
-````
+```
 
 ---
 
 ## Examples
 
 ### OCI Generative AI
+
 Notes:
+
 - **Cohere models do not support OpenAI-compatible API**
 
 #### Using the OCI OpenAI Synchronous Client
@@ -73,7 +75,7 @@ from oci_openai import AsyncOciOpenAI, OciSessionAuth
 
 client = AsyncOciOpenAI(
     auth=OciSessionAuth(profile_name="<profile name>"),
-    region="us-chicago-1",
+    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1",
     compartment_id="<compartment ocid>",
 )
 
@@ -100,23 +102,26 @@ from oci_openai import OciUserPrincipalAuth
 # Example for OCI Generative AI endpoint
 client = OpenAI(
     api_key="OCI",
-    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
+    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1",
     http_client=httpx.Client(
-        auth=OciUserPrincipalAuth(profile_name="DEFAULT"),
-        headers={"opc-compartment-id": COMPARTMENT_ID}
+        auth=OciSessionAuth(profile_name="<profile name>"),
+        headers={
+            "CompartmentId": "<compartment ocid>"
+        },
     ),
 )
 
-response = client.chat.completions.create(
-    model="<model-name>",
+completion = client.chat.completions.create(
+    model="openai.gpt-4.1",
     messages=[
         {
             "role": "user",
-            "content": "Explain how to list all files in a directory using Python.",
+            "content": "How do I output all files in a directory using Python?",
         },
     ],
 )
-print(response.model_dump_json())
+print(completion.model_dump_json())
+
 ```
 
 #### Using with langchain-openai
@@ -133,9 +138,9 @@ COMPARTMENT_ID=os.getenv("OCI_COMPARTMENT_ID", "<compartment_id>")
 llm = ChatOpenAI(
     model="<model-name>",  # for example "xai.grok-4-fast-reasoning"
     api_key="OCI",
-    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
+    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1",
     http_client=httpx.Client(
-        auth=OciUserPrincipalAuth(profile_name="DEFAULT"),
+        auth=OciUserPrincipalAuth(profile_name="<profile name>"),
         headers={"CompartmentId": COMPARTMENT_ID}
     ),
     # use_responses_api=True
@@ -210,7 +215,6 @@ response = await client.chat.completions.create(
 print(response.model_dump_json())
 ```
 
-
 #### Using the Native OpenAI Client
 
 ```python
@@ -243,11 +247,11 @@ print(response.model_dump_json())
 The library supports multiple OCI authentication methods (signers). Choose the one that matches your runtime environment and security posture.
 
 Supported signers
+
 - `OciSessionAuth` — Uses an OCI session token from your local OCI CLI profile.
 - `OciResourcePrincipalAuth` — Uses Resource Principal auth.
 - `OciInstancePrincipalAuth` — Uses Instance Principal auth. Best for OCI Compute instances with dynamic group policies.
 - `OciUserPrincipalAuth` — Uses an OCI user API key. Suitable for service accounts/automation where API keys are managed securely.
-
 
 Minimal examples of constructing each auth type:
 

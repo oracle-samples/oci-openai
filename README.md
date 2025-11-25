@@ -105,14 +105,12 @@ client = OpenAI(
     base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1",
     http_client=httpx.Client(
         auth=OciSessionAuth(profile_name="<profile name>"),
-        headers={
-            "CompartmentId": "<compartment ocid>"
-        },
+        headers={"CompartmentId": "<compartment ocid>"}
     ),
 )
 
 completion = client.chat.completions.create(
-    model="openai.gpt-4.1",
+    model="<model name>",
     messages=[
         {
             "role": "user",
@@ -130,18 +128,15 @@ print(completion.model_dump_json())
 from langchain_openai import ChatOpenAI
 import httpx
 from oci_openai import OciUserPrincipalAuth
-import os
 
-
-COMPARTMENT_ID=os.getenv("OCI_COMPARTMENT_ID", "<compartment_id>")
 
 llm = ChatOpenAI(
-    model="<model-name>",  # for example "xai.grok-4-fast-reasoning"
+    model="<model name>",  # for example "xai.grok-4-fast-reasoning"
     api_key="OCI",
     base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1",
     http_client=httpx.Client(
         auth=OciUserPrincipalAuth(profile_name="<profile name>"),
-        headers={"CompartmentId": COMPARTMENT_ID}
+        headers={"CompartmentId": "<compartment ocid>"}
     ),
     # use_responses_api=True
     # stream_usage=True,

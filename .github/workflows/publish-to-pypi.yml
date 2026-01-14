@@ -16,10 +16,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
+      - name: Set up Python 3
+        uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.x"
+      - name: Get tags
+        run: git fetch --tags origin
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -36,7 +38,8 @@ jobs:
       - name: Publish to Test PyPI
         run: |
           python -m pip install twine
-          twine upload -r testpypi dist/*
+          twine check dist/*
+          twine upload --verbose -r testpypi dist/*
       # - name: Publishto PyPI
       #   run: |
       #     pip install twine

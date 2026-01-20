@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling", "hatch-vcs"]
+requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
@@ -62,7 +62,7 @@ Issues = "https://github.com/oracle-samples/oci-openai/issues"
 Source = "https://github.com/oracle-samples/oci-openai"
 
 [tool.hatch.version]
-source = "vcs"
+path = "src/oci_openai/__about__.py"
 
 [tool.hatch.envs.types]
 extra-dependencies = [

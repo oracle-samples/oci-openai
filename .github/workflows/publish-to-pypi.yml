@@ -1,0 +1,45 @@
+name: Publish Python Package
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  release-build:
+    runs-on: ubuntu-latest
+    # PyPI use trusted publisher    
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install uv
+          uv venv
+          make dev
+      - name: Build
+        run: |
+          make build
+      - name: Validate
+        run: |
+          python -m pip install dist/*.whl
+          python -c "import oci_openai;"
+      # - name: Publish to Test PyPI
+      #   run: |
+      #     python -m pip install twine
+      #     twine check dist/*
+      #     twine upload --verbose -r testpypi dist/*
+      - name: Publish to PyPI
+        run: |
+          python -m pip install twine
+          twine check dist/*
+          twine upload --verbose dist/*

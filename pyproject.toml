@@ -52,7 +52,8 @@ dev = [
       "pytest-mock",
       "ag2[openai]",
       "pytest-httpx",
-      "pytest-asyncio"
+      "pytest-asyncio",
+      "eval_type_backport"
 ]
 
 [project.urls]

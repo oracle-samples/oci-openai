@@ -11,6 +11,7 @@ The **OCI OpenAI** Python library provides secure and convenient access to the O
 
 - [oci-openai](#oci-openai)
   - [Table of Contents](#table-of-contents)
+  - [Before You Start](#before-you-start)
   - [Installation](#installation)
   - [Examples](#examples)
     - [OCI Generative AI](#oci-generative-ai)
@@ -28,6 +29,76 @@ The **OCI OpenAI** Python library provides secure and convenient access to the O
   - [License](#license)
 
 ---
+
+## Before you start
+
+**Important!**
+
+Note that this package, as well as API keys package described below, only supports OpenAI, xAi Grok and Meta LLama models on OCI Generative AI.
+
+Before you start using this package, determine if this is the right option for you.
+
+If you are looking for a seamless way to port your code from an OpenAI compatible endpoint to OCI Generative AI endpoint, and you are currently using OpenAI-style API keys, you might want to use [OCI Generative AI API Keys](https://docs.oracle.com/en-us/iaas/Content/generative-ai/api-keys.htm) instead.
+
+With OCI Generative AI API Keys, use the native `openai` SDK like before. Just update the `base_url`, create API keys in your OCI console, insure the policy granting the key access to generative AI services is present and you are good to go.
+
+- Create an API key in Console: **Generative AI** -> **API Keys**
+- Create a security policy: **Identity & Security** -> **Policies**
+
+To authorize a specific API Key
+```
+allow any-user to use generative-ai-family in compartment <compartment-name> where ALL { request.principal.type='generativeaiapikey', request.principal.id='ocid1.generativeaiapikey.oc1.us-chicago-1....' }
+```
+
+To authorize any API Key
+```
+allow any-user to use generative-ai-family in compartment <compartment-name> where ALL { request.principal.type='generativeaiapikey' }
+```
+
+- Update the `base_url` in your code:
+
+```python
+from openai import OpenAI
+import os
+
+API_KEY=os.getenv("OPENAI_API_KEY")
+
+print(API_KEY)
+
+client = OpenAI(
+    api_key=API_KEY,
+    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1"
+)
+
+# Responses API
+response = client.responses.create(
+    model="openai.gpt-oss-120b",
+    # model="xai.grok-3",
+    # meta models are not supported with the Responses API
+    input="Write a one-sentence bedtime story about a unicorn."
+)
+print(response)
+
+# Completion API
+response = client.chat.completions.create(
+    # model="openai.gpt-oss-120b",
+    # model="meta.llama-3.3-70b-instruct",
+    model="xai.grok-3",
+    messages=[{
+        "role": "user", 
+        "content": "Write a one-sentence bedtime story about a unicorn."
+        }
+    ]
+)
+print(response)
+```
+
+
+API Keys offer a seamless transition from code using the openai SDK, and allow usage in 3rd party code or services that don't offer an override of the http client.
+
+However, if authentication at the user, compute instance, resource or workload level (OKE pods) is preferred, this package is for you.
+
+It offers the same compatibility with the `openai` SDK, but requires patching the http client. See the following instruction on how to use it.
 
 ## Installation
 

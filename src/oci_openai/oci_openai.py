@@ -219,6 +219,21 @@ class HttpxOciAuth(httpx.Auth, ABC):
                 except Exception as e:
                     logger.exception("Warning: Token refresh failed:", e)
 
+    def _sign_request(self, request: httpx.Request, content: bytes) -> None:
+        """
+        Sign the given HTTPX request with the OCI signer using the provided content.
+        Updates request.headers in place with the signed headers.
+        """
+        req = requests.Request(
+            method=request.method,
+            url=str(request.url),
+            headers=dict(request.headers),
+            data=content,
+        )
+        prepared_request = req.prepare()
+        self.signer.do_request_sign(prepared_request)  # type: ignore
+        request.headers.update(prepared_request.headers)
+
     @override
     def auth_flow(self, request: httpx.Request) -> Generator[httpx.Request, httpx.Response, None]:
         """
@@ -243,19 +258,7 @@ class HttpxOciAuth(httpx.Auth, ABC):
             # For streaming requests, we need to read the content first
             content = request.read()
 
-        req = requests.Request(
-            method=request.method,
-            url=str(request.url),
-            headers=dict(request.headers),
-            data=content,
-        )
-        prepared_request = req.prepare()
-
-        # Sign the request using the OCI Signer
-        self.signer.do_request_sign(prepared_request)  # type: ignore
-
-        # Update the original HTTPX request with the signed headers
-        request.headers.update(prepared_request.headers)
+        self._sign_request(request, content)
 
         response = yield request
 
@@ -266,15 +269,7 @@ class HttpxOciAuth(httpx.Auth, ABC):
                 try:
                     self._refresh_signer()
                     self._last_refresh = time.time()
-                    req = requests.Request(
-                        method=request.method,
-                        url=str(request.url),
-                        headers=dict(request.headers),
-                        data=content,
-                    )
-                    prepared_request = req.prepare()
-                    self.signer.do_request_sign(prepared_request)
-                    request.headers.update(prepared_request.headers)
+                    self._sign_request(request, content)
                     yield request
                 except Exception as e:
                     logger.exception("Token refresh on 401 failed:", e)

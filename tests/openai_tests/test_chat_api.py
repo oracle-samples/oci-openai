@@ -172,13 +172,14 @@ def test_build_headers():
     assert result["opc-conversation-store-id"] == CONVERSATION_STORE_ID
 
 
-#Tests for HttpxOciAuth token refresh functionality.
+# Tests for HttpxOciAuth token refresh functionality.
 def test_should_refresh_token_returns_true_when_last_refresh_is_none():
     """When _last_refresh is None, _should_refresh_token returns True."""
     with patch("oci.auth.signers.get_resource_principals_signer", return_value=MagicMock()):
         auth = OciResourcePrincipalAuth(refresh_interval=3600)
     auth._last_refresh = None
     assert auth._should_refresh_token() is True
+
 
 def test_should_refresh_token_returns_false_within_interval():
     """When within refresh_interval, _should_refresh_token returns False."""
@@ -187,12 +188,14 @@ def test_should_refresh_token_returns_false_within_interval():
     auth._last_refresh = time.time() - 100  # 100 seconds ago
     assert auth._should_refresh_token() is False
 
+
 def test_should_refresh_token_returns_true_past_interval():
     """When past refresh_interval, _should_refresh_token returns True."""
     with patch("oci.auth.signers.get_resource_principals_signer", return_value=MagicMock()):
         auth = OciResourcePrincipalAuth(refresh_interval=3600)
     auth._last_refresh = time.time() - 3700  # over 1 hour ago
     assert auth._should_refresh_token() is True
+
 
 def test_refresh_if_needed_calls_refresh_signer_when_interval_elapsed():
     """_refresh_if_needed calls _refresh_signer when token should be refreshed."""
@@ -201,6 +204,7 @@ def test_refresh_if_needed_calls_refresh_signer_when_interval_elapsed():
     with patch.object(auth, "_refresh_signer") as mock_refresh:
         auth._refresh_if_needed()
         mock_refresh.assert_called_once()
+
 
 def test_refresh_if_needed_does_not_call_refresh_signer_when_within_interval():
     """_refresh_if_needed does not call _refresh_signer when within interval."""
@@ -211,8 +215,11 @@ def test_refresh_if_needed_does_not_call_refresh_signer_when_within_interval():
         auth._refresh_if_needed()
         mock_refresh.assert_not_called()
 
+
 def test_refresh_signer_called_on_resource_principal_refresh():
-    """OciResourcePrincipalAuth._refresh_signer creates new signer via get_resource_principals_signer."""
+    """
+    OciResourcePrincipalAuth._refresh_signer creates new signer via get_resource_principals_signer.
+    """
     mock_signer = MagicMock()
     with patch(
         "oci.auth.signers.get_resource_principals_signer",

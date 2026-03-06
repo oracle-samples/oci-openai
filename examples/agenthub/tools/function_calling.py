@@ -8,7 +8,7 @@ import json
 from openai.types.responses import ResponseFunctionToolCall
 from openai.types.responses.response_input_param import FunctionCallOutput
 
-from examples.agenthub.common import oci_openai_client
+from examples.agenthub.common import client
 
 model = "openai.gpt-4.1"
 
@@ -46,7 +46,7 @@ function_tools = [
 ]
 
 # First request - model decides to call the function
-response = oci_openai_client.responses.create(
+response = client.responses.create(
     model=model,
     input="What is the weather in Seattle?",
     tools=function_tools,
@@ -62,7 +62,7 @@ if isinstance(response.output[0], ResponseFunctionToolCall):
     result = get_current_weather(**function_args)
 
     # Send the function output back to the model
-    response = oci_openai_client.responses.create(
+    response = client.responses.create(
         model=model,
         input=[
             FunctionCallOutput(

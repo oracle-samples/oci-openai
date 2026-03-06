@@ -3,19 +3,19 @@
 
 """Multi-turn conversation using Responses Chaining (previous_response_id)."""
 
-from examples.agenthub.common import oci_openai_client
+from examples.agenthub.common import client
 
 model = "openai.gpt-4.1"
 
 # First turn
-response1 = oci_openai_client.responses.create(
+response1 = client.responses.create(
     model=model,
     input="Tell me a joke. Keep it short.",
 )
 print("Response 1:", response1.output_text)
 
 # Second turn, chaining to the first
-response2 = oci_openai_client.responses.create(
+response2 = client.responses.create(
     model=model,
     input="Why is it funny?",
     previous_response_id=response1.id,

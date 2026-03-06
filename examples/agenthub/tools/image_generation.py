@@ -5,9 +5,9 @@
 
 import base64
 
-from examples.agenthub.common import oci_openai_client
+from examples.agenthub.common import client
 
-response = oci_openai_client.responses.create(
+response = client.responses.create(
     model="openai.gpt-5",
     input="Generate an image of gray tabby cat hugging an otter with an orange scarf",
     tools=[{"type": "image_generation"}],

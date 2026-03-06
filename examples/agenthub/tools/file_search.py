@@ -3,11 +3,11 @@
 
 """File Search tool example - searches a Vector Store for relevant content."""
 
-from examples.agenthub.common import oci_openai_client
+from examples.agenthub.common import client
 
 VECTOR_STORE_ID = "<your-vector-store-id>"
 
-response = oci_openai_client.responses.create(
+response = client.responses.create(
     model="openai.gpt-4.1",
     input="What are shapes of OCI GPU?",
     tools=[

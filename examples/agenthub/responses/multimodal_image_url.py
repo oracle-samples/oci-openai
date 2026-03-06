@@ -3,9 +3,9 @@
 
 """Multi-modality example - image input as internet-accessible URL."""
 
-from examples.agenthub.common import oci_openai_client
+from examples.agenthub.common import client
 
-response = oci_openai_client.responses.create(
+response = client.responses.create(
     model="openai.gpt-4.1",
     store=False,
     input=[

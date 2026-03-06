@@ -5,10 +5,10 @@
 
 import json
 
-from examples.agenthub.common import oci_openai_client
+from examples.agenthub.common import client
 
 # Reasoning with effort control
-response = oci_openai_client.responses.create(
+response = client.responses.create(
     model="openai.gpt-5",
     input="What is the answer to 12 * (3 + 9)?",
     reasoning={"effort": "high"},
@@ -18,7 +18,7 @@ print("Reasoning effort output:")
 print(json.dumps(response.to_dict()["output"], indent=4))
 
 # Reasoning with detailed summary
-response = oci_openai_client.responses.create(
+response = client.responses.create(
     model="openai.gpt-5",
     input="What is the answer to 12 * (3 + 9)?",
     reasoning={"summary": "detailed"},

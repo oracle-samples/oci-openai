@@ -3,17 +3,17 @@
 
 """Multi-modality example - file input as uploaded File ID."""
 
-from examples.agenthub.common import oci_openai_client
+from examples.agenthub.common import client
 
 # Upload a file first
 with open("/path/to/file.pdf", "rb") as f:
-    file = oci_openai_client.files.create(
+    file = client.files.create(
         file=f,
         purpose="user_data",
     )
 
 # Use the file in a response
-response = oci_openai_client.responses.create(
+response = client.responses.create(
     model="openai.gpt-4.1",
     input=[
         {

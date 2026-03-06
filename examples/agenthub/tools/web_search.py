@@ -3,9 +3,9 @@
 
 """Web Search tool example."""
 
-from examples.agenthub.common import oci_openai_client
+from examples.agenthub.common import client
 
-response = oci_openai_client.responses.create(
+response = client.responses.create(
     model="openai.gpt-4.1",
     tools=[{"type": "web_search"}],
     input="What was a positive news story on 2025-11-14?",

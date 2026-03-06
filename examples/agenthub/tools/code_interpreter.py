@@ -3,9 +3,9 @@
 
 """Code Interpreter tool example - writes and runs code in a sandbox."""
 
-from examples.agenthub.common import oci_openai_client
+from examples.agenthub.common import client
 
-response = oci_openai_client.responses.create(
+response = client.responses.create(
     model="openai.gpt-4.1",
     tools=[
         {

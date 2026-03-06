@@ -5,7 +5,7 @@
 
 from pydantic import BaseModel
 
-from examples.agenthub.common import oci_openai_client
+from examples.agenthub.common import client
 
 
 class CalendarEvent(BaseModel):
@@ -14,7 +14,7 @@ class CalendarEvent(BaseModel):
     participants: list[str]
 
 
-response = oci_openai_client.responses.parse(
+response = client.responses.parse(
     model="openai.gpt-4.1",
     input=[
         {"role": "system", "content": "Extract the event information."},

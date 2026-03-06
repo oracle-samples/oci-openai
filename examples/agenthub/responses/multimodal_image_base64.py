@@ -5,7 +5,7 @@
 
 import base64
 
-from examples.agenthub.common import oci_openai_client
+from examples.agenthub.common import client
 
 
 def encode_image(image_path):
@@ -15,7 +15,7 @@ def encode_image(image_path):
 
 base64_image = encode_image("/path/to/image.png")
 
-response = oci_openai_client.responses.create(
+response = client.responses.create(
     model="openai.gpt-4.1",
     store=False,
     input=[

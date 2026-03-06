@@ -3,9 +3,9 @@
 
 """Remote MCP tool example - calls tools on a remote MCP server."""
 
-from examples.agenthub.common import oci_openai_client
+from examples.agenthub.common import client
 
-response_stream = oci_openai_client.responses.create(
+response_stream = client.responses.create(
     model="openai.gpt-4.1",
     tools=[
         {

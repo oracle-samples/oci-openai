@@ -3,9 +3,9 @@
 
 """Basic Responses API example using the Agentic API."""
 
-from examples.agenthub.common import oci_openai_client
+from examples.agenthub.common import client
 
-response = oci_openai_client.responses.create(
+response = client.responses.create(
     model="openai.gpt-4.1",
     input="What is 2x2?",
 )

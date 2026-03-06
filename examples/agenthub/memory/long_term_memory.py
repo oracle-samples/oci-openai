@@ -5,16 +5,16 @@
 
 import time
 
-from examples.agenthub.common import oci_openai_client
+from examples.agenthub.common import client
 
 model = "openai.gpt-4.1"
 
 # First conversation - store preferences
-conversation1 = oci_openai_client.conversations.create(
+conversation1 = client.conversations.create(
     metadata={"memory_subject_id": "user_123456"},
 )
 
-response = oci_openai_client.responses.create(
+response = client.responses.create(
     model=model,
     input="I like Fish. I don't like Shrimp.",
     conversation=conversation1.id,
@@ -26,11 +26,11 @@ print("Waiting for long-term memory processing...")
 time.sleep(10)
 
 # Second conversation - recall preferences
-conversation2 = oci_openai_client.conversations.create(
+conversation2 = client.conversations.create(
     metadata={"memory_subject_id": "user_123456"},
 )
 
-response = oci_openai_client.responses.create(
+response = client.responses.create(
     model=model,
     input="What do I like?",
     conversation=conversation2.id,

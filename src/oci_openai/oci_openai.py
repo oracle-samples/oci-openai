@@ -28,6 +28,15 @@ COMPARTMENT_ID_HEADER = "CompartmentId"
 OPC_COMPARTMENT_ID_HEADER = "opc-compartment-id"
 CONVERSATION_STORE_ID_HEADER = "opc-conversation-store-id"
 
+_DEPRECATION_MSG_COMPARTMENT = (
+    "compartment_id is deprecated and will be removed after the migration grace period. "
+    "Use project (Generative AI Project OCID) instead."
+)
+_DEPRECATION_MSG_CONVERSATION_STORE = (
+    "conversation_store_id is deprecated and will be removed after the migration grace period. "
+    "Use project (Generative AI Project OCID) instead."
+)
+
 
 class OciOpenAI(OpenAI):
     """
@@ -45,8 +54,10 @@ class OciOpenAI(OpenAI):
                                        provided, the region will be ignored.
         base_url (str | None): The OCI service full path URL. when base_url provided, the region
                                and service_endpoint will be ignored.
-        compartment_id (str | None): OCI compartment OCID for resource isolation, required for
-                                     Generative AI Service, Optional for Data Science Service
+        project (str | None): Generative AI Project OCID. Required for Generative AI Service
+                              in GA. Replaces compartment_id and conversation_store_id.
+        compartment_id (str | None): Deprecated. OCI compartment OCID. Supported during
+                                     migration grace period. Use project instead.
         timeout (float | Timeout | None | NotGiven): Request timeout configuration.
         max_retries (int): Maximum number of retry attempts for failed requests.
         default_headers (Mapping[str, str] | None): Default HTTP headers.
@@ -60,7 +71,8 @@ class OciOpenAI(OpenAI):
         region: str = None,
         service_endpoint: str = None,
         base_url: str = None,
-        compartment_id: str = None,
+        project: Optional[str] = None,
+        compartment_id: Optional[str] = None,
         conversation_store_id: Optional[str] = None,
         timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
         max_retries: int = DEFAULT_MAX_RETRIES,
@@ -68,17 +80,27 @@ class OciOpenAI(OpenAI):
         default_query: Optional[Mapping[str, object]] = None,
         **kwargs: Any,
     ) -> None:
+        import warnings
+
         base_url = _resolve_base_url(region, service_endpoint, base_url)
 
-        if "generativeai" in base_url and not compartment_id:
+        if compartment_id:
+            warnings.warn(_DEPRECATION_MSG_COMPARTMENT, DeprecationWarning, stacklevel=2)
+        if conversation_store_id:
+            warnings.warn(_DEPRECATION_MSG_CONVERSATION_STORE, DeprecationWarning, stacklevel=2)
+
+        if "generativeai" in base_url and not project and not compartment_id:
             raise ValueError(
-                "The compartment_id is required to access the OCI Generative AI Service."
+                "A project (Generative AI Project OCID) is required to access the "
+                "OCI Generative AI Service. The compartment_id parameter is deprecated; "
+                "please use project instead."
             )
         http_client_headers = _build_headers(compartment_id, conversation_store_id)
 
         super().__init__(
             api_key=API_KEY,
             base_url=base_url,
+            project=project,
             timeout=timeout,
             max_retries=max_retries,
             default_headers=default_headers,
@@ -107,8 +129,10 @@ class AsyncOciOpenAI(AsyncOpenAI):
                                        provided, the region will be ignored.
         base_url (str | None): The OCI service full path URL. when base_url provided, the region
                                and service_endpoint will be ignored.
-        compartment_id (str | None): OCI compartment OCID for resource isolation, required for
-                                     Generative AI Service, Optional for Data Science Service
+        project (str | None): Generative AI Project OCID. Required for Generative AI Service
+                              in GA. Replaces compartment_id and conversation_store_id.
+        compartment_id (str | None): Deprecated. OCI compartment OCID. Supported during
+                                     migration grace period. Use project instead.
         timeout (float | Timeout | None | NotGiven): Request timeout configuration.
         max_retries (int): Max retry attempts for failed requests.
         default_headers (Mapping[str, str] | None): Default HTTP headers.
@@ -122,6 +146,7 @@ class AsyncOciOpenAI(AsyncOpenAI):
         region: str = None,
         service_endpoint: str = None,
         base_url: str = None,
+        project: Optional[str] = None,
         compartment_id: Optional[str] = None,
         conversation_store_id: Optional[str] = None,
         timeout: float | Timeout | None | NotGiven = NOT_GIVEN,
@@ -130,17 +155,27 @@ class AsyncOciOpenAI(AsyncOpenAI):
         default_query: Optional[Mapping[str, object]] = None,
         **kwargs: Any,
     ) -> None:
+        import warnings
+
         base_url = _resolve_base_url(region, service_endpoint, base_url)
 
-        if "generativeai" in base_url and not compartment_id:
+        if compartment_id:
+            warnings.warn(_DEPRECATION_MSG_COMPARTMENT, DeprecationWarning, stacklevel=2)
+        if conversation_store_id:
+            warnings.warn(_DEPRECATION_MSG_CONVERSATION_STORE, DeprecationWarning, stacklevel=2)
+
+        if "generativeai" in base_url and not project and not compartment_id:
             raise ValueError(
-                "The compartment_id is required to access the OCI Generative AI Service."
+                "A project (Generative AI Project OCID) is required to access the "
+                "OCI Generative AI Service. The compartment_id parameter is deprecated; "
+                "please use project instead."
             )
         http_client_headers = _build_headers(compartment_id, conversation_store_id)
 
         super().__init__(
             api_key=API_KEY,
             base_url=base_url,
+            project=project,
             timeout=timeout,
             max_retries=max_retries,
             default_headers=default_headers,

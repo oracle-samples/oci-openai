@@ -13,16 +13,15 @@ The **OCI OpenAI** Python library provides secure and convenient access to the O
   - [Table of Contents](#table-of-contents)
   - [Before You Start](#before-you-start)
   - [Installation](#installation)
-  - [Examples](#examples)
+  - [Agentic API (GA)](#agentic-api-ga)
+    - [Quickstart with API Key](#quickstart-with-api-key)
+    - [Quickstart with OCI IAM](#quickstart-with-oci-iam)
+    - [Using the OciOpenAI Client](#using-the-ociopenai-client)
+    - [Migration from LA to GA](#migration-from-la-to-ga)
+  - [Agent Hub Examples](#agent-hub-examples)
+  - [Examples (Legacy / Chat Completions)](#examples-legacy--chat-completions)
     - [OCI Generative AI](#oci-generative-ai)
-      - [Using the OCI OpenAI Synchronous Client](#using-the-oci-openai-synchronous-client)
-      - [Using the OCI OpenAI Asynchronous Client](#using-the-oci-openai-asynchronous-client)
-      - [Using the Native OpenAI Client](#using-the-native-openai-client)
-      - [Using with Langchain](#using-with-langchain-openai)
     - [OCI Data Science Model Deployment](#oci-data-science-model-deployment)
-      - [Using the OCI OpenAI Synchronous Client](#using-the-oci-openai-synchronous-client-1)
-      - [Using the OCI OpenAI Asynchronous Client](#using-the-oci-openai-asynchronous-client-1)
-      - [Using the Native OpenAI Client](#using-the-native-openai-client-1)
     - [Signers](#signers)
   - [Contributing](#contributing)
   - [Security](#security)
@@ -108,7 +107,119 @@ pip install oci-openai
 
 ---
 
-## Examples
+## Agentic API (GA)
+
+The OCI Generative AI Platform **Agentic API** is a unified, OpenAI Responses-compatible API for building agents. It supports multiple model providers (GPT, Grok, Gemini, GPT-OSS), platform-managed tools (web search, file search, code interpreter, MCP, image generation), conversation memory, and more — all under unified OCI auth, billing, and governance.
+
+In GA, a **Generative AI Project** replaces the previous `compartment_id` and `conversation_store_id` parameters. Create a project in the OCI Console, then pass its OCID via the `project` parameter.
+
+### Quickstart with API Key
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
+    api_key="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",  # your API Key
+    project="ocid1.generativeaiproject.oc1.us-chicago-1.xxxxxxxx",  # your Project OCID
+)
+
+response = client.responses.create(
+    model="openai.gpt-4.1",
+    input="What is 2x2?",
+)
+print(response.output_text)
+```
+
+### Quickstart with OCI IAM
+
+```python
+import httpx
+from openai import OpenAI
+from oci_openai import OciSessionAuth
+
+client = OpenAI(
+    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
+    api_key="not-used",
+    project="ocid1.generativeaiproject.oc1.us-chicago-1.xxxxxxxx",  # your Project OCID
+    http_client=httpx.Client(auth=OciSessionAuth(profile_name="DEFAULT")),
+)
+
+response = client.responses.create(
+    model="openai.gpt-4.1",
+    input="What is 2x2?",
+)
+print(response.output_text)
+```
+
+### Using the OciOpenAI Client
+
+The `OciOpenAI` client now accepts a `project` parameter directly:
+
+```python
+from oci_openai import OciOpenAI, OciSessionAuth
+
+client = OciOpenAI(
+    auth=OciSessionAuth(profile_name="DEFAULT"),
+    region="us-chicago-1",
+    project="ocid1.generativeaiproject.oc1.us-chicago-1.xxxxxxxx",
+)
+
+response = client.responses.create(
+    model="openai.gpt-4.1",
+    input="What is 2x2?",
+)
+print(response.output_text)
+```
+
+### Migration from LA to GA
+
+| Before (LA) | After (GA) |
+|---|---|
+| `compartment_id="ocid1.compartment..."` | `project="ocid1.generativeaiproject..."` |
+| `conversation_store_id="ocid1.generativeaiconversationstore..."` | `project="ocid1.generativeaiproject..."` |
+
+Both `compartment_id` and `conversation_store_id` still work during the migration grace period but emit deprecation warnings.
+
+---
+
+## Agent Hub Examples
+
+The [`examples/agenthub/`](./examples/agenthub/) directory contains examples for all GA Agentic API capabilities:
+
+| Category | Example | Description |
+|---|---|---|
+| **Quickstart** | [`quickstart_api_key.py`](./examples/agenthub/quickstart_api_key.py) | API Key auth quickstart |
+| | [`quickstart_oci_iam.py`](./examples/agenthub/quickstart_oci_iam.py) | OCI IAM auth quickstart |
+| **Responses** | [`responses/create_response.py`](./examples/agenthub/responses/create_response.py) | Basic response |
+| | [`responses/create_response_streaming.py`](./examples/agenthub/responses/create_response_streaming.py) | Streaming (delta text) |
+| | [`responses/structured_output.py`](./examples/agenthub/responses/structured_output.py) | Structured output with Pydantic |
+| | [`responses/choosing_models.py`](./examples/agenthub/responses/choosing_models.py) | Using different model providers |
+| | [`responses/reasoning.py`](./examples/agenthub/responses/reasoning.py) | Reasoning effort and summary |
+| **Multi-Modality** | [`responses/multimodal_image_base64.py`](./examples/agenthub/responses/multimodal_image_base64.py) | Image input (base64) |
+| | [`responses/multimodal_image_url.py`](./examples/agenthub/responses/multimodal_image_url.py) | Image input (URL) |
+| | [`responses/multimodal_file_id.py`](./examples/agenthub/responses/multimodal_file_id.py) | File input (File ID) |
+| | [`responses/multimodal_file_url.py`](./examples/agenthub/responses/multimodal_file_url.py) | File input (URL) |
+| **Tools** | [`tools/web_search.py`](./examples/agenthub/tools/web_search.py) | Web Search |
+| | [`tools/file_search.py`](./examples/agenthub/tools/file_search.py) | File Search (Vector Store) |
+| | [`tools/code_interpreter.py`](./examples/agenthub/tools/code_interpreter.py) | Code Interpreter |
+| | [`tools/image_generation.py`](./examples/agenthub/tools/image_generation.py) | Image Generation |
+| | [`tools/mcp_tool.py`](./examples/agenthub/tools/mcp_tool.py) | Remote MCP tool |
+| | [`tools/function_calling.py`](./examples/agenthub/tools/function_calling.py) | Local function calling |
+| | [`tools/multiple_tools.py`](./examples/agenthub/tools/multiple_tools.py) | Multiple tools in one request |
+| **Conversation** | [`conversation/responses_chaining.py`](./examples/agenthub/conversation/responses_chaining.py) | Multi-turn via response chaining |
+| | [`conversation/conversations_api.py`](./examples/agenthub/conversation/conversations_api.py) | Multi-turn via Conversations API |
+| **Memory** | [`memory/long_term_memory.py`](./examples/agenthub/memory/long_term_memory.py) | Long-term memory across conversations |
+| | [`memory/long_term_memory_access_policy.py`](./examples/agenthub/memory/long_term_memory_access_policy.py) | Memory access policy control |
+| | [`memory/short_term_memory_optimization.py`](./examples/agenthub/memory/short_term_memory_optimization.py) | Short-term memory optimization |
+| **Files** | [`files/files_api.py`](./examples/agenthub/files/files_api.py) | Files API (upload, list, retrieve, delete) |
+| **Vector Stores** | [`vector_stores/vector_stores_api.py`](./examples/agenthub/vector_stores/vector_stores_api.py) | Vector Stores API (CRUD + search) |
+| | [`vector_stores/vector_store_files_api.py`](./examples/agenthub/vector_stores/vector_store_files_api.py) | Vector Store Files API |
+| | [`vector_stores/vector_store_file_batches_api.py`](./examples/agenthub/vector_stores/vector_store_file_batches_api.py) | Vector Store File Batches API |
+
+---
+
+## Examples (Legacy / Chat Completions)
 
 ### OCI Generative AI
 

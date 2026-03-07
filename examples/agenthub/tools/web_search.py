@@ -6,7 +6,7 @@
 from examples.agenthub.common import client
 
 response = client.responses.create(
-    model="openai.gpt-4.1",
+    model="xai.grok-4-1-fast-reasoning",
     tools=[{"type": "web_search"}],
     input="What was a positive news story on 2025-11-14?",
 )

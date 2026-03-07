@@ -7,7 +7,7 @@ import time
 
 from examples.agenthub.common import client
 
-model = "openai.gpt-4.1"
+model = "xai.grok-4-1-fast-reasoning"
 
 # First conversation - store preferences
 conversation1 = client.conversations.create(

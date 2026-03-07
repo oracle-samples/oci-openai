@@ -15,12 +15,15 @@ class CalendarEvent(BaseModel):
 
 
 response = client.responses.parse(
-    model="openai.gpt-4.1",
+    model="xai.grok-4-1-fast-reasoning",
     input=[
-        {"role": "system", "content": "Extract the event information."},
         {
-            "role": "user",
-            "content": "Alice and Bob are going to a science fair on Friday.",
+          "role": "system",
+          "content": "Extract the event information.",
+        },
+        {
+          "role": "user",
+          "content": "Alice and Bob are going to a science fair on Friday.",
         },
     ],
     store=False,

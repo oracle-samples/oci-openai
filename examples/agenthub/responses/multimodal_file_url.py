@@ -6,13 +6,16 @@
 from examples.agenthub.common import client
 
 response = client.responses.create(
-    model="openai.gpt-4.1",
+    model="xai.grok-4-1-fast-reasoning",
     store=False,
     input=[
         {
             "role": "user",
             "content": [
-                {"type": "input_text", "text": "What is in this file?"},
+                {
+                    "type": "input_text",
+                    "text": "Analyze the letter and provide a summary of the key points.",
+                },
                 {
                     "type": "input_file",
                     "file_url": "https://www.berkshirehathaway.com/letters/2024ltr.pdf",

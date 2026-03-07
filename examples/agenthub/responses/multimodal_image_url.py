@@ -6,13 +6,16 @@
 from examples.agenthub.common import client
 
 response = client.responses.create(
-    model="openai.gpt-4.1",
+    model="xai.grok-4-1-fast-reasoning",
     store=False,
     input=[
         {
             "role": "user",
             "content": [
-                {"type": "input_text", "text": "What's in this image?"},
+                {
+                    "type": "input_text",
+                    "text": "What's in this image?",
+                },
                 {
                     "type": "input_image",
                     "image_url": "https://picsum.photos/id/237/200/300",

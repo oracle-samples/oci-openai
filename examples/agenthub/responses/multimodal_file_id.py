@@ -14,7 +14,7 @@ with open("/path/to/file.pdf", "rb") as f:
 
 # Use the file in a response
 response = client.responses.create(
-    model="openai.gpt-4.1",
+    model="xai.grok-4-1-fast-reasoning",
     input=[
         {
             "role": "user",

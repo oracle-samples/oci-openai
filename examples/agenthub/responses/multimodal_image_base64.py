@@ -16,13 +16,16 @@ def encode_image(image_path):
 base64_image = encode_image("/path/to/image.png")
 
 response = client.responses.create(
-    model="openai.gpt-4.1",
+    model="xai.grok-4-1-fast-reasoning",
     store=False,
     input=[
         {
             "role": "user",
             "content": [
-                {"type": "input_text", "text": "What's in this image?"},
+                {
+                    "type": "input_text",
+                    "text": "What's in this image?",
+                },
                 {
                     "type": "input_image",
                     "image_url": f"data:image/jpeg;base64,{base64_image}",

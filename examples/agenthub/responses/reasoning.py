@@ -7,22 +7,22 @@ import json
 
 from examples.agenthub.common import client
 
-# Reasoning with effort control
-response = client.responses.create(
-    model="openai.gpt-5",
-    input="What is the answer to 12 * (3 + 9)?",
-    reasoning={"effort": "high"},
-    store=False,
-)
-print("Reasoning effort output:")
-print(json.dumps(response.to_dict()["output"], indent=4))
-
 # Reasoning with detailed summary
 response = client.responses.create(
-    model="openai.gpt-5",
+    model="xai.grok-4-1-fast-reasoning",
     input="What is the answer to 12 * (3 + 9)?",
     reasoning={"summary": "detailed"},
     store=False,
 )
 print("\nReasoning summary output:")
+print(json.dumps(response.to_dict()["output"], indent=4))
+
+# Reasoning with effort control (grok model does not support reasoning effort)
+response = client.responses.create(
+    model="openai.gpt-5.2",
+    input="What is the answer to 12 * (3 + 9)?",
+    reasoning={"summary": "detailed", "effort": "high" },
+    store=False,
+)
+print("Reasoning effort output:")
 print(json.dumps(response.to_dict()["output"], indent=4))

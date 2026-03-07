@@ -19,12 +19,12 @@ from oci_openai import OciSessionAuth
 client = OpenAI(
     base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1",
     api_key="not-used",
-    project="ocid1.generativeaiproject.oc1.us-chicago-1.xxxxxxxx",  # your Project OCID
+    project="ocid1.generativeaiproject.oc1.us-chicago-1.xxxxxxx",  # your OCI GenAI Project OCID
     http_client=httpx.Client(auth=OciSessionAuth(profile_name="DEFAULT")),
 )
 
 response = client.responses.create(
-    model="openai.gpt-4.1",
+    model="xai.grok-4-1-fast-reasoning",
     input="What is 2x2?",
 )
 print(response.output_text)

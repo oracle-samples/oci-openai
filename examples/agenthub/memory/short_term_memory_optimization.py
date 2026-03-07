@@ -9,7 +9,7 @@ Enable STMO in the project settings, or per-conversation via metadata flag.
 
 from examples.agenthub.common import client
 
-model = "openai.gpt-4.1"
+model = "xai.grok-4-1-fast-reasoning"
 
 # Create a conversation with STMO enabled
 conversation = client.conversations.create(

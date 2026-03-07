@@ -8,7 +8,7 @@ from examples.agenthub.common import client
 VECTOR_STORE_ID = "<your-vector-store-id>"
 
 response = client.responses.create(
-    model="openai.gpt-4.1",
+    model="xai.grok-4-1-fast-reasoning",
     input="What are shapes of OCI GPU?",
     tools=[
         {

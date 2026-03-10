@@ -4,16 +4,16 @@
 """Multi-modality example - image input as base64-encoded data URL."""
 
 import base64
-
+from pathlib import Path
 from examples.agenthub.common import client
-
 
 def encode_image(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode("utf-8")
 
-
-base64_image = encode_image("/path/to/image.png")
+# assuming the file "Cat.jpg" is in the same directory as this script
+image_file_path = Path(__file__).parent / "Cat.jpg"
+base64_image = encode_image(image_file_path)
 
 response = client.responses.create(
     model="xai.grok-4-1-fast-reasoning",

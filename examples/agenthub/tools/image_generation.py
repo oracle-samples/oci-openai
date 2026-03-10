@@ -8,7 +8,7 @@ import base64
 from examples.agenthub.common import client
 
 response = client.responses.create(
-    model="xai.grok-4-1-fast-reasoning",
+    model="openai.gpt-5.2",
     input="Generate an image of gray tabby cat hugging an otter with an orange scarf",
     tools=[{"type": "image_generation"}],
     store=False,

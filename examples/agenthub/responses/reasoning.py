@@ -17,7 +17,7 @@ response = client.responses.create(
 print("\nReasoning summary output:")
 print(json.dumps(response.to_dict()["output"], indent=4))
 
-# Reasoning with effort control (grok model does not support reasoning effort)
+# Reasoning with effort control (using GPT-5.2 model because grok model does not support reasoning effort)
 response = client.responses.create(
     model="openai.gpt-5.2",
     input="What is the answer to 12 * (3 + 9)?",

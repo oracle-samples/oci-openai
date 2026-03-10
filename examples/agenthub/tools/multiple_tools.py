@@ -8,7 +8,9 @@ from examples.agenthub.common import client
 response_stream = client.responses.create(
     model="xai.grok-4-1-fast-reasoning",
     tools=[
-        {"type": "web_search"},
+        {
+            "type": "web_search"
+        },
         {
             "type": "mcp",
             "server_label": "gitmcp",

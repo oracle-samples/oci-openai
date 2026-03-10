@@ -6,7 +6,7 @@
 from examples.agenthub.common import client
 
 VECTOR_STORE_ID = "<your-vector-store-id>"
-FILE_ID = "<your-file-id>"
+FILE_ID = "<your-file-id>" # file id created by the Files API
 
 # Add a file to a vector store
 create_result = client.vector_stores.files.create(

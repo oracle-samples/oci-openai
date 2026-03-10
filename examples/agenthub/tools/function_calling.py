@@ -45,7 +45,7 @@ function_tools = [
     }
 ]
 
-# First request - model decides to call the function
+# First API request - model decides to call the function
 response = client.responses.create(
     model=model,
     input="What is the weather in Seattle?",
@@ -61,7 +61,7 @@ if isinstance(response.output[0], ResponseFunctionToolCall):
     # Execute the local function
     result = get_current_weather(**function_args)
 
-    # Send the function output back to the model
+    # Second API request - send the function output back to the model
     response = client.responses.create(
         model=model,
         input=[

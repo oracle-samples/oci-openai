@@ -28,10 +28,3 @@ list_result = client.vector_stores.file_batches.list_files(
     batch_id=batch_result.id,
 )
 print("\nBatch files:", list_result)
-
-# Cancel a batch (if still in progress)
-# cancel_result = client.vector_stores.file_batches.cancel(
-#     vector_store_id=VECTOR_STORE_ID,
-#     batch_id=batch_result.id,
-# )
-# print("\nCancelled:", cancel_result)

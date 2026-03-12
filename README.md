@@ -142,24 +142,29 @@ print(completion.model_dump_json())
 #### Using the OCI OpenAI Asynchronous Client
 
 ```python
+import asyncio
 from oci_openai import AsyncOciOpenAI, OciSessionAuth
 
-client = AsyncOciOpenAI(
-    auth=OciSessionAuth(profile_name="<profile name>"),
-    base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1",
-    compartment_id="<compartment ocid>",
-)
+async def main():
+    client = AsyncOciOpenAI(
+        base_url="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/20231130/actions/v1",
+        auth=OciSessionAuth(profile_name="<profile name>"),
+        compartment_id="<compartment ocid>"
+    )
+    response = await client.chat.completions.create(
+        model="<model name>",
+        
+        messages=[
+            {
+                "role": "user",
+                "content": "Explain how to list all files in a directory using Python.",
+            },
+        ],
+    )
+    print(response.model_dump_json())
 
-completion = await client.chat.completions.create(
-    model="<model name>",
-    messages=[
-        {
-            "role": "user",
-            "content": "How do I output all files in a directory using Python?",
-        },
-    ],
-)
-print(completion.model_dump_json())
+# Execute the async function
+asyncio.run(main())
 ```
 
 #### Using the Native OpenAI Client

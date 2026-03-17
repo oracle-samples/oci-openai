@@ -3,9 +3,9 @@
 
 """Code Interpreter tool example - writes and runs code in a sandbox."""
 
-from examples.agenthub.common import client
+from examples.agenthub.common import ppe_client
 
-response = client.responses.create(
+response = ppe_client.responses.create(
     model="xai.grok-4-1-fast-reasoning",
     tools=[
         {
@@ -16,4 +16,4 @@ response = client.responses.create(
     instructions="Write and run code using the python tool to answer the question.",
     input="I need to solve the equation 3x + 11 = 14. Can you help me?",
 )
-print(response.output_text)
+print(response)

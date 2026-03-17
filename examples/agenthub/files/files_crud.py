@@ -17,20 +17,13 @@ pdf_file_path = Path(__file__).parent / "2024ltr.pdf"
 
 # Upload a file
 with open(pdf_file_path, "rb") as f:
-    file = kix_client.files.create(
-        file=f,
-        purpose="user_data",
-    )
+    file = kix_client.files.create(file=f, purpose="user_data")
     print("Uploaded file:", file)
 
 # Retrieve file metadata
-file = kix_client.files.retrieve(file_id="file-kix-5d04dec2-b59d-4330-84c7-6c0a804c4996")
-print("\nRetrieved file:", file)
-
-# Retrieve file content
-content = kix_client.files.content(file_id="file-kix-5d04dec2-b59d-4330-84c7-6c0a804c4996")
-print("\nFile content:", content)
+retrieved_result = kix_client.files.retrieve(file_id=file.id)
+print("\nRetrieved file:", retrieved_result)
 
 # Delete file
-delete_result = kix_client.files.delete(file_id="file-kix-8107c258-e916-4af8-a40b-6a04fa1c4bdd")
+delete_result = kix_client.files.delete(file_id=file.id)
 print("\nDelete result:", delete_result)

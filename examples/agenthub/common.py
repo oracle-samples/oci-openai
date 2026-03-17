@@ -58,3 +58,27 @@ kix_cp_client = OpenAI(
     api_key="not-used",
     http_client=httpx.Client(auth=OciSessionAuth(profile_name="DEFAULT")),
 )
+
+ORD_REGION = "us-chicago-1"
+
+# Responses API, Conversations API, Files API, Containers API use the data plane base URL
+PPE_DATA_PLANE_URL = f"https://ppe.inference.generativeai.{ORD_REGION}.oci.oraclecloud.com/openai/v1"
+
+# Vector Stores API uses the control plane base URL
+PPE_CONTROL_PLANE_URL = f"https://ppe.generativeai.{ORD_REGION}.oci.oraclecloud.com/20231130/openai/v1"
+
+# Create the client to interact with Responses API, Conversations API, Files API, Containers API
+ppe_client = OpenAI(
+    base_url=PPE_DATA_PLANE_URL,
+    api_key="not-used",
+    http_client=httpx.Client(auth=OciSessionAuth(profile_name="DEFAULT")),
+    project="ocid1.generativeaiproject.oc1.us-chicago-1.amaaaaaacqy6p4qaw2pz56aelwelvxu5tjmxb7tntnmzjv6guml2fussi4aa",
+)
+
+# Create the client to interact with Vector Stores API and Vector Store Files API
+ppe_cp_client = OpenAI(
+    base_url=PPE_CONTROL_PLANE_URL,
+    # Using IAM auth as API key is not yet supported for Vector Stores API
+    api_key="not-used",
+    http_client=httpx.Client(auth=OciSessionAuth(profile_name="DEFAULT")),
+)

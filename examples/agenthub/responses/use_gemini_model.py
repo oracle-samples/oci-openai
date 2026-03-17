@@ -1,17 +1,12 @@
 # Copyright (c) 2025 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl/
 
-"""Streaming Responses API example - streams delta text tokens."""
+"""Examples of using Gemini model."""
 
 from examples.agenthub.common import ppe_client
 
-response_stream = ppe_client.responses.create(
+response = ppe_client.responses.create(
     model="google.gemini-2.5-pro",
     input="What is 2x2?",
-    stream=True,
 )
-
-for event in response_stream:
-    print(event.type, event.delta)
-
-print()
+print(response.output_text)

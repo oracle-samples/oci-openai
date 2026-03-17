@@ -1,7 +1,7 @@
 # Copyright (c) 2025 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl/
 
-from examples.agenthub.common import cp_client, kix_client, kix_cp_client
+from examples.agenthub.common import kix_client, kix_cp_client
 import time
 
 """Vector Store Search example."""

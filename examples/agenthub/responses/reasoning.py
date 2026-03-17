@@ -3,26 +3,25 @@
 
 """Reasoning examples - effort control and summary output."""
 
-import json
-
 from examples.agenthub.common import client
 
-# Reasoning with detailed summary
-response = client.responses.create(
-    model="xai.grok-4-1-fast-reasoning",
-    input="What is the answer to 12 * (3 + 9)?",
-    reasoning={"summary": "detailed"},
-    store=False,
-)
-print("\nReasoning summary output:")
-print(json.dumps(response.to_dict()["output"], indent=4))
 
-# Reasoning with effort control (using GPT-5.2 model because grok model does not support reasoning effort)
+prompt = """
+Write a bash script that takes a matrix represented as a string with
+format '[1,2],[3,4],[5,6]' and prints the transpose in the same format.
+"""
+
 response = client.responses.create(
-    model="openai.gpt-5.2",
-    input="What is the answer to 12 * (3 + 9)?",
-    reasoning={"summary": "detailed", "effort": "high" },
-    store=False,
+    model="openai.gpt-oss-120b",
+    input=prompt,
+    reasoning={"effort": "medium", "summary": "detailed"},
+    stream=True,
 )
-print("Reasoning effort output:")
-print(json.dumps(response.to_dict()["output"], indent=4))
+for event in response:
+    if event.type == "response.reasoning_summary_part.added":
+        print("Thinking...")
+    if event.type == "response.reasoning_summary_text.delta":
+        print(event.delta, end="", flush=True)
+    if event.type == "response.output_text.delta":
+        print(event.delta, end="", flush=True)
+print()

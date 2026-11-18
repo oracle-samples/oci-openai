@@ -265,14 +265,19 @@ class HttpxOciAuth(httpx.Auth, ABC):
         # If we get a 401 (Unauthorized), try refreshing the token once and retry
         if response.status_code == 401:
             logger.info("Received 401 Unauthorized, attempting token refresh and retry...")
+            # Only refresh and re-sign under the lock. The retry itself is sent
+            # after the lock is released: with an async client, yielding here
+            # while holding the lock blocks the event loop in _refresh_if_needed()
+            # for every other request, and the retry can never complete.
             with self._lock:
                 try:
                     self._refresh_signer()
                     self._last_refresh = time.time()
                     self._sign_request(request, content)
-                    yield request
-                except Exception as e:
-                    logger.exception("Token refresh on 401 failed:", e)
+                except Exception:
+                    logger.exception("Token refresh on 401 failed")
+                    return
+            yield request
 
 
 class OciSessionAuth(HttpxOciAuth):
